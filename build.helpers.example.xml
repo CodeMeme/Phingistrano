@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="helpers" default="help">
+
+    <!-- ============================================= -->
+    <!-- Target: tunnel                                -->
+    <!-- ============================================= -->
+    <target name="tunnel"   depends="tunnel.phingistrano.conf,tunnel.open" />
+
+    <target name="tunnel.phingistrano.conf" >
+        <property name="tunnel.gateway"     value="204.99.99.99" />
+        <property name="tunnel.id"          value="GroupId" />
+        <property name="tunnel.secret"      value="mySecret" />
+        <property name="tunnel.username"    value="jesse" />
+        <property name="tunnel.password"    value="jiveturkey" />
+        <property name="tunnel.confpath"    value="${project.basedir}/tmp.conf" />
+        <property name="tunnel.client"      value="/usr/sbin/vpnc-connect" />
+        <property name="tunnel.execline"    value="sudo ${tunnel.client} ${tunnel.confpath}" />
+        <property name="tunnel.configured"  value="true"    override="true" />
+    </target>
+
+    <target name="restart.memcached"
+            depends="deploy.memcachedump"
+            description="Restarts the memcached on production" />
+
+    <target name="restart.memcached.staging"
+            depends="staging.properties, deploy.memcachedump"
+            description="Restarts the memcached on staging" />
+
+    <target name="remote.production"
+            depends="deploy.remote"
+            description="Interactive prompt to execute a command on the production server" />
+
+   <target name="remote.staging"
+            depends="staging.properties, deploy.remote"
+            description="Interactive prompt to execute a command on the staging server" />
+    
+    <!-- target shortcuts -->
+    <target name="test"         depends="test.do"   />
+    <target name="docs"         depends="docs.do"   />
+    <target name="sniff"        depends="sniff.do"  />
+    <target name="staging"      depends="deploy.staging" />
+    <target name="production"   depends="deploy.production" />
+    <target name="snack" ><echo>nom nom nom...</echo></target>
+
+</project>

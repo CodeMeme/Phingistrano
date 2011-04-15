@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Phingistrano" default="help">
+
+    <!-- Imports -->
+    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
+    <import file="${project.basedir}/build.helpers.xml" />
+
+    <!-- Required properties -->
+    <property name="deploy.strategy"   value="hybrid" />
+    <property name="deploy.remote"     value="172.99.99.91" />
+    <property name="deploy.remotedir"  value="~/${phing.project.name}" />
+    <property name="deploy.execline"   value="deploy.production" />
+    <property name="deploy.branch"     value="master" />
+    <property name="deploy.user"       value="jesse" />
+    <property name="deploy.password"   value="jiveturkey" />
+    <property name="deploy.path"       value="/var/www/deployments/schools/${deploy.branch}" />
+    <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
+    <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
+    <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
+    <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
+    <property name="version.to"        value="jesse@codememe.com" />
+    <property name="version.from"      value="robot@codememe.com" />
+    <property name="sniff.standard"    value="Pear" />
+    <property name="docs.library"      value="${project.basedir}/library" />    
+
+    <!-- Main Targets -->
+    <target name="help"
+            depends="modules.help"
+            description="This help Menu." />
+
+    <target name="build"
+            depends="test.do, sniff.do, docs.do"
+            description="Main Build Routine." />
+
+    <target name="release"
+            depends="version.tag, deploy.production, version.notify"
+            description="Executes a release to production." />
+
+    <target name="deploy.production"
+            depends="deploy.do"
+            description="Deploys master branch to production." />
+
+    <target name="rollback.production"
+            depends="rollback.do"
+            description="Rolls back a production release." />
+
+    <target name="deploy.staging"
+            depends="staging.properties, deploy.do"
+            description="Deploys the current branch to staging." />
+
+    <target name="rollback.staging"
+            depends="staging.properties, rollback.do"
+            description="Rolls back the staging environment." />
+
+    <target name="deploy.testing"
+            depends="testing.properties, deploy.do"
+            description="Deploys current branch to testing." />
+
+    <target name="rollback.testing"
+            depends="testing.properties, rollback.do"
+            description="Rolls back the testing environment." />
+
+    <!-- Targets that assign properties -->
+    <target name="staging.properties"      depends="deploy.currentbranch" >
+        <property name="deploy.servers"    value="172.99.99.97"    override="true" />
+        <property name="deploy.path"       value="/var/www/deployments/phingistrano/develop" override="true" />
+        <property name="deploy.log"        value="2&gt;&amp;1 | tee -a ${deploy.path}/deploy.log" override="true" />
+        <property name="deploy.execline"   value="deploy.staging" override="true" />
+    </target>
+
+    <target name="testing.properties"      depends="deploy.currentbranch">
+        <property name="deploy.path"       value="/var/www/deployments/phingistrano/develop"   override="true" />
+        <property name="deploy.log"        value="2&gt;&amp;1 | tee -a ${deploy.path}/deploy.log" override="true" />
+        <property name="deploy.execline"   value="deploy.testing" override="true" />
+    </target>
+
+</project>
