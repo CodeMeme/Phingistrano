@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="modules" description="phing loading external modules" default="info">
+    <php function="dirname" returnProperty="modules.basedir">
+        <param value="${phing.file.modules}"/>
+    </php>
+
+    <import file="${modules.basedir}/deploy/build.xml" />
+    <import file="${modules.basedir}/version/build.xml" />
+    <import file="${modules.basedir}/sniff/build.xml" />
+    <import file="${modules.basedir}/docs/build.xml" />
+    <import file="${modules.basedir}/test/build.xml" />
+    <import file="${modules.basedir}/rollback/build.xml" />
+    <import file="${modules.basedir}/tunnel/build.xml" />
+
+    <!-- ============================================ -->
+    <!-- (DEFAULT) Target: help                       -->
+    <!-- ============================================ -->
+
+    <target name="help" >
+        <exec command="phing -list -quiet" dir="${project.basedir}" outputProperty="modules" />
+        <php expression="substr('${modules}', 0, strpos('${modules}','Subtargets:'))" returnProperty="modules" />
+        <echo msg="${modules}" />
+    </target>
+    <!-- shortcut to help -->
+    <target name="info" depends="help" />
+    
+    
+    <!-- generic declarations -->
+    <!--
+         These have to be here for submodule targets.
+         To refer to a submodule target with its namespace,
+         The target must be declared in this or the main buildfile.
+         Phing Ticket #620 has been submitted as a CR.
+    -->
+    <target name="tag" />
+    <target name="notify" />
+    <target name="currentbranch" />
+    <target name="clean" />
+    <target name="verbose" />
+    <target name="prepare" />
+    <target name="prepare.distributed" />
+    <target name="prepare.direct" />
+    <target name="prepare.hybrid" />
+    <target name="open" />
+    <target name="do" />
+    <target name="convert" />
+    <target name="distributed" />
+    <target name="direct" />
+    <target name="hybrid" />
+    <target name="deliver" />
+    <target name="upload" />
+    <target name="download" />
+    <target name="memcached" />
+    <target name="memcachedump" />
+    <target name="getlist" />
+    <target name="remote" />
+    <target name="remotecmd" />
+
+</project>

@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html>
+<body>
+
+<h2>** Release Notice **</h2>
+
+<p>
+The application <strong>${phing.project.name}</strong> has a new release as of ${timeStamp}.
+</p>
+
+<p>
+Changes from past release <em>${beginTag}</em> to this release <em>${endTag}</em>...
+<pre>${changeLog}</pre>
+</p>
+
+<p>
+Files affected:
+<pre>${fullDiffStat}</pre>
+</p>
+
+<p>
+<a href="https://github.com/${remoteOrigin}/compare/${beginTag}...${endTag}">Review these changes on Github</a>
+</p>
+
+</body>
+</html>

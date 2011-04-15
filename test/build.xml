@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="test" description="testing" default="do" >
+
+    <!-- ============================================ -->
+    <!-- (DEFAULT) Target: info                       -->
+    <!-- ============================================ -->
+    <target name="info" >
+    
+        <php function="dirname" returnProperty="test.basedir">
+            <param value="${phing.file.test}" />
+        </php>
+        
+        <exec dir="${test.basedir}" 
+              outputProperty="targets" 
+              command="phing -list -quiet" />
+              
+        <echo msg="${targets}" />
+        
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: prepare                               -->
+    <!-- ============================================  -->
+    <target name="prepare" >
+    
+        <available file="${project.basedir}/build/reports" 
+                   property="test.reportsexists" 
+                   value="true" />
+        <if>
+            <not>
+		        <equals arg1="${test.reportsexist}" arg2="1" />
+	        </not>
+            <then>
+                <!-- create required directories -->
+                <mkdir dir="${project.basedir}/build/reports" />
+            </then>
+        </if>
+        
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: do                                    -->
+    <!-- ============================================  -->
+    <target name="do" depends="test.prepare" >
+
+        <property name="test.bootstrap" value="${project.basedir}/TestStrap.php" />
+
+        <available file="${test.bootstrap}" property="bootstrapexists" value="Yes"/>
+
+        <!-- create a test bootstrap if one doesnt exist -->
+        <if>
+            <not>
+                <equals arg1="${bootstrapexists}" arg2="1" />
+            </not>
+            <then>
+                <echo file="${test.bootstrap}" 
+                      msg="&lt;?php${line.separator}" />
+
+                <echo file="${test.bootstrap}" 
+                      msg="#Unit Test Boostrap${line.separator}" 
+                      append="true" />
+
+                <echo file="${test.bootstrap}" 
+                      msg="?&gt;${line.separator}" 
+                      append="true" />
+            </then>
+        </if>
+
+        <!-- set the application environment if designated by the command -->
+        <if>
+            <isset property="test.env" />
+            <then>
+
+            <echo msg="PHPUnit is testing against ${test.env} per request" />
+
+                <echo file="TestHelper.${test.env}.php" >
+                    &lt;?php
+                    putenv('APPLICATION_ENV=${test.env}');
+                    include('${test.bootstrap}');
+                </echo>
+                <property name="test.bootstrap" 
+                          value="TestHelper.${test.env}.php" 
+                          override="true" />
+            </then>
+        </if>
+
+        <!-- set default unit test properties -->
+        <property name="test.type" value="xml" />
+        
+        <property name="test.usefile" value="true" />
+        
+        <property name="test.haltfail" value="true" />
+        
+        <property name="test.halterror" value="true" />
+
+        <!-- run unit test -->
+        <phpunit bootstrap="${test.bootstrap}"
+                 printsummary="true"
+                 haltonfailure="${test.haltfail}"
+                 haltonerror="${test.halterror}" >
+                 
+            <formatter todir="${project.basedir}/build/reports"
+                       type="${test.type}"
+                       usefile="${test.usefile}" />
+                       
+            <formatter type="plain" usefile="no" />
+            
+            <batchtest>
+                <fileset dir="${project.basedir}/tests">
+                    <include name="**/*Test.php"/>
+                </fileset>
+            </batchtest>
+            
+        </phpunit>
+
+        <delete file="TestHelper.${test.env}.php" quiet="true" />
+        
+    </target>
+
+</project>

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="rollback" description="utilities for rolling back  deployments" default="info" >
+
+    <property name="rollback.direction" value="reverse"/>
+    <property name="rollback.depth" value="1" />
+    <property name="rollback.selected" value="false" />
+
+    <!-- ============================================ -->
+    <!-- (DEFAULT) Target: info                       -->
+    <!-- ============================================ -->
+    <target name="info" >
+    
+        <php function="dirname" returnProperty="rollback.basedir">
+            <param value="${phing.file.rollback}" />
+        </php>
+        
+        <exec dir="${rollback.basedir}" 
+              outputProperty="targets" 
+              command="phing -list -quiet" />
+              
+        <echo msg="${targets}" />
+        
+    </target>
+    
+    <target name="help"  depends="info" />
+
+    <!-- ============================================  -->
+    <!-- Target: do                                    -->
+    <!-- ============================================  -->
+    <target name="do" >
+    
+        <echo msg="executing rollback... " />
+        <echo msg="============================ " />
+
+        <!-- transfer the file via scp -->
+        <foreach list="${deploy.servers}" param="rollback.server" target="rollback.deliver" />
+
+        <!-- cleanup -->
+        <delete file="${project.basedir}/pointer.tmp" />
+        <delete file="${project.basedir}/list.tmp" />
+
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: download                              -->
+    <!-- ============================================  -->
+    <target name="download" >
+    
+        <!-- take snapshot of all deployments -->
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${rollback.server}" 
+             command="ls -t ${deploy.path}/releases > ${deploy.path}/list.tmp" />
+
+        <!-- take snapshot of current deployment pointer -->
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${rollback.server}" 
+             command="ls -l ${deploy.path} | grep current > ${deploy.path}/pointer.tmp" />
+
+        <!-- download snapshots -->
+        <scp username="${deploy.user}" 
+             password="${deploy.password}" 
+             host="${rollback.server}" 
+             fetch="true" 
+             todir="${project.basedir}" 
+             file="${deploy.path}/list.tmp" />
+
+        <scp username="${deploy.user}" 
+             password="${deploy.password}" 
+             host="${rollback.server}" 
+             fetch="true" 
+             todir="${project.basedir}" 
+             file="${deploy.path}/pointer.tmp" />
+
+        <!-- delete temporary remote files -->
+        <ssh username="${deploy.user}" 
+             password="${deploy.password}"
+             host="${rollback.server}" 
+             command="rm ${deploy.path}/*.tmp" />
+
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: getlist                               -->
+    <!-- ============================================  -->
+
+    <target name="getlist" >
+
+        <!-- evaluate current deployment pointer -->
+        <exec dir="${project.basedir}" 
+              outputProperty="rollback.current" 
+              command="cat ${project.basedir}/pointer.tmp" />
+
+        <php expression="substr('${rollback.current}',  (strrpos('${rollback.current}', '/'))+1)" 
+             returnProperty="rollback.current" />
+
+        <echo msg="current: ${rollback.current}" />
+
+        <!-- normalize list -->
+        <exec dir="${project.basedir}" 
+              outputProperty="rollback.deployments" 
+              command="cat ${project.basedir}/list.tmp" />
+
+        <php function="preg_replace" returnProperty="rollback.deployments" >
+            <param value="/\s/" />
+            <param value="," />
+            <param value="${rollback.deployments}" />
+        </php>
+        
+        <echo msg="deployment list: ${rollback.deployments}" />
+
+        <!-- identify position of current deployment -->
+        <php expression="array_search('${rollback.current}',explode(',','${rollback.deployments}'))+1" 
+             returnProperty="rollback.position" />
+
+        <!-- get total deployments available -->
+        <php expression="count(explode(',','${rollback.deployments}'))" 
+             returnProperty="rollback.count" />
+
+        <echo msg="list position of current: ${rollback.position} of ${rollback.count}" />
+
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: deliver                               -->
+    <!-- ============================================  -->
+
+    <target name="deliver" depends="rollback.download,rollback.getlist" >
+
+        <!-- determine position of target deployment -->
+        <if>
+         <isfalse value="${rollback.selected}"/>
+         <then>
+           <echo msg="Determining the selected deployment" />
+           <if>
+                <not>
+                    <equals arg1="${rollback.direction}" arg2="reverse" />
+                </not>
+                <then>
+                    <php expression="${rollback.position}-${rollback.depth}" 
+                         returnProperty="rollback.selected" />
+                </then>
+                <else>
+                    <php expression="${rollback.position}+${rollback.depth}" 
+                         returnProperty="rollback.selected" />
+                </else>
+           </if>
+         </then>
+           <else>
+                <echo msg="The deployment was selected by the user" />
+           </else>
+        </if>
+
+        <!-- protect miniumum and maximum selection parameters -->
+        <php expression="(${rollback.selected} &gt; 0)?'true':'false'" 
+             returnProperty="rollback.checkmin" />
+             
+        <php expression="(${rollback.selected} &lt;= ${rollback.count})?'true':'false'" 
+             returnProperty="rollback.checkmax" />
+
+        <if>
+            <isfalse value="${rollback.checkmin}"/>
+            <then>
+                <property name="rollback.selected" value="1" />
+            </then>
+        </if>
+
+        <if>
+            <isfalse value="${rollback.checkmax}"/>
+            <then>
+                <property name="rollback.selected" value="${rollback.count}" />
+            </then>
+        </if>
+
+        <!-- assign the selected position -->
+        <php expression="current(array_slice(explode(',','${rollback.deployments}'),(${rollback.selected}-1),1))" 
+             returnProperty="rollback.target" />
+
+        <echo msg="Rollback target determined to be: ${rollback.target}" />
+
+        <!-- link it -->
+        <echo msg="deleting symlink: ${deploy.deploy_to}/current" />
+        
+        <ssh username="${deploy.user}" 
+             password="${deploy.password}"
+             host="${rollback.server}" 
+             command="rm ${deploy.path}/current" />
+
+        <echo msg="creating new symlink: ${deploy.deploy_to}/current" />
+        
+        <ssh username="${deploy.user}" 
+             password="${deploy.password}"
+             host="${rollback.server}" 
+             command="ln -s ${deploy.path}/releases/${rollback.target} 
+                      ${deploy.path}/current" />
+
+        <!-- restart memcached -->
+        <echo msg="restarting memcached" />
+        
+        <ssh username="${deploy.user}" 
+             password="${deploy.password}"
+             host="${rollback.server}" 
+             command="echo ${deploy.password} | 
+                      sudo -S /etc/init.d/memcached restart" />
+                      
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: verbose                               -->
+    <!-- ============================================  -->
+    <target name="verbose" >
+    
+        <echo msg="\\== Rolling back with the following properties ==//" />
+        <echo msg="Project: ${phing.project.name}" />
+        <echo msg="repository: ${deploy.repository}" />
+        <echo msg="user: ${deploy.user}" />
+        <echo msg="password: ${deploy.password}" />
+        <echo msg="branch: ${deploy.branch}" />
+        <echo msg="deploy path: ${deploy.path}" />
+        <echo msg="webservers: ${deploy.servers}" />
+        
+    </target>
+
+</project>

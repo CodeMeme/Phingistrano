@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="docs" description="documentation" default="do" >
+
+    <!-- ============================================ -->
+    <!-- (DEFAULT) Target: info                       -->
+    <!-- ============================================ -->
+    <target name="info" >
+    
+        <php function="dirname" returnProperty="docs.basedir">
+            <param value="${phing.file.docs}" />
+        </php>
+        <exec dir="${docs.basedir}" 
+              outputProperty="targets" 
+              command="phing -list -quiet" />
+        <echo msg="${targets}" />
+        
+    </target>
+    
+    <target name="help"  depends="info" />
+
+    <!-- ============================================  -->
+    <!-- Target: doc                                   -->
+    <!-- ============================================  -->
+    <target name="do" >
+    
+        <phpdoc title="Forms Documentation"
+                destdir="${project.basedir}/build/docs"
+                sourcecode="false"
+                output="HTML:frames:DOM/earthli"
+                quiet="true">
+                
+            <!-- sweeps the application directory for php files -->
+            <fileset dir="${project.basedir}/application">
+                <include name="**/*.php" />
+            </fileset>
+
+            <!-- sweeps the specified library directory for php files -->
+            <fileset dir="${docs.library}">
+                <include name="**/*.php" />
+            </fileset>
+            
+        </phpdoc>
+        
+    </target>
+
+</project>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="version" description="versioning and scm related utilities" default="info" phingVersion="2.4.4">
+
+    <!-- ============================================  -->
+    <!-- Custom Properties                             -->
+    <!-- ============================================  -->
+    <php function="dirname" returnProperty="version.basedir">
+        <param value="${phing.file.version}"/>
+    </php>
+    <property name="repo.dir" value="${project.basedir}" />
+
+    <!-- ============================================  -->
+    <!-- Custom Taskdefs                               -->
+    <!-- ============================================  -->
+    <taskdef classpath="${version.basedir}/" classname="GitDescribeTask"   name="gitdescribe" />
+    <taskdef classpath="${version.basedir}/" classname="GitDiffTask"       name="gitdiff" />
+    <taskdef classpath="${version.basedir}/" classname="GitLogTask"        name="gitlog" />
+    <taskdef classpath="${version.basedir}/" classname="GitRemoteShowTask" name="gitremoteshow" />
+    <taskdef classpath="${version.basedir}/" classname="GitTagTask"        name="gittag" />
+    <taskdef classpath="${version.basedir}/" classname="MimeMailTask"      name="mimemail" />
+
+    <!-- ============================================ -->
+    <!-- (DEFAULT) Target: info                       -->
+    <!-- ============================================ -->
+    <target name="info" >
+        <exec command="phing -list -quiet" dir="${version.basedir}" outputProperty="targets" />
+        <echo msg="${targets}" />
+    </target>
+    <target name="help"  depends="info" />
+
+    <!-- ============================================  -->
+    <!-- Target: pushtags                                -->
+    <!-- ============================================  -->
+    <target name="pushtags">
+        <gitpush repository="${repo.dir}"
+                 quiet="false"
+                 tags="true" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: tag                                   -->
+    <!-- ============================================  -->
+    <target name="tag">
+        <!-- Checkout master branch and ensure it's up to date -->
+        <gitcheckout repository="${repo.dir}" branchname="master" />
+        <gitpull repository="${repo.dir}"
+                 source="origin"
+                 refspec="master" />
+        <!-- Pull and merge in the remote develop branch -->
+        <gitpull repository="${repo.dir}"
+                 source="origin"
+                 refspec="develop" />
+        <!-- Generate a custom log of changes since the last dated tag -->
+        <gitdescribe repository="${repo.dir}"
+                     tags="true"
+                     abbrev="0"
+                     match="*-*-*.*"
+                     outputProperty="mostRecentTag" />
+        <php function="trim" returnProperty="mostRecentTag">
+            <param value="${mostRecentTag}"/>
+        </php>
+        <gitlog repository="${repo.dir}"
+                since="${mostRecentTag}"
+                until="HEAD"
+                noMerges="true"
+                date="relative"
+                format="format:* %an [%ar] %s"
+                outputProperty="changeLog" />
+        <!-- Only tag & push if there were any changes made since the last version bump -->
+        <if>
+            <equals arg1="${changeLog}" arg2="" />
+            <then>
+                <echo msg="No changes made since last version bump.  Nothing to do!" />
+            </then>
+            <else>
+                <echo msg="executing bumpversion with: ${repo.dir}" />
+                <!-- Make new dated tag, using aforementioned log as tag message -->
+                <tstamp>
+                    <format property="tagStamp" pattern="%Y-%m-%d.%H%M%S" />
+                </tstamp>
+                <echo msg="Tagging as ${tagStamp}" />
+                <gittag repository="${repo.dir}"
+                        annotate="true"
+                        name="${tagStamp}"
+                        message="${changeLog}" />
+                <!-- Push commits and tags -->
+                <gitpush repository="${repo.dir}" quiet="false" />
+                <gitpush repository="${repo.dir}"
+                         quiet="false"
+                         tags="true" />
+            </else>
+        </if>
+        <!-- Checkout develop branch -->
+        <gitcheckout repository="${repo.dir}" branchname="develop" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: notify                                -->
+    <!-- ============================================  -->
+    <target name="notify">
+        <!-- Get two most recent tags -->
+        <gitdescribe repository="${repo.dir}"
+                     tags="true"
+                     match="*-*-*.*"
+                     abbrev="0"
+                     outputProperty="endTag"
+		     committish="master" />
+        <php function="trim" returnProperty="endTag">
+            <param value="${endTag}"/>
+        </php>
+        <gitdescribe repository="${repo.dir}"
+                     tags="true"
+                     match="*-*-*.*"
+                     abbrev="0"
+                     committish="${endTag}^"
+                     outputProperty="beginTag" />
+        <php function="trim" returnProperty="beginTag">
+            <param value="${beginTag}"/>
+        </php>
+        <!-- Generate a custom log of changes between the two tags -->
+        <gitlog repository="${repo.dir}"
+                since="${beginTag}"
+                until="${endTag}"
+                date="relative"
+                format="format:* %an [%ar] %s"
+                outputProperty="changeLog" />
+        <gitdiff repository="${repo.dir}"
+                 shortstat="true"
+                 commits="${beginTag}..${endTag}"
+                 outputProperty="shortDiffStat" />
+        <php function="rtrim" returnProperty="shortDiffStat">
+            <param value="${shortDiffStat}"/>
+        </php>
+        <gitdiff repository="${repo.dir}"
+                 stat="true"
+                 commits="${beginTag}..${endTag}"
+                 outputProperty="fullDiffStat" />
+        <php function="rtrim" returnProperty="fullDiffStat">
+            <param value="${fullDiffStat}"/>
+        </php>
+        <!-- Get the github remote origin (UserName/RepoName) -->
+        <gitremoteshow repository="${repo.dir}"
+                       name="origin"
+                       outputProperty="remoteOrigin" />
+        <php function="preg_replace" returnProperty="remoteOrigin">
+            <param value="!.*URL: [^\n]+(?:@|://)github.com(?:/|:)(.*)\.git.*!ms" />
+            <param value="$1" />
+            <param value="${remoteOrigin}" />
+        </php>
+        <!-- Human readable timestamp -->
+        <tstamp>
+            <format property="timeStamp" pattern="%A %B%e %Y, %I:%M%p %z" />
+        </tstamp>
+        <!-- And assemble it all into a nicely formatted email -->
+        <mimemail html="true"
+                  from="${version.from}"
+                  to="${version.to}"
+                  subject="[${endTag}] Release of '${phing.project.name}': ${shortDiffStat}"
+                  template="${version.basedir}/notify.html" />
+    </target>
+
+</project>
