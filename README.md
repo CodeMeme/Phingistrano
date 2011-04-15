@@ -132,16 +132,16 @@ Add the submodule pathing to your .gitmodule file:
 
 
 To update the submodule
----
-git submodule update
+---  
+
+    git submodule update
 
 
 Gotchas:
 --
 namespaced submodules won't work if a base target doesn't exist
 ---
-I percieve this as a problem with phing. If you refer to a namespaced target (namespaced.mytarget) 
-in "depends", in the <phing /> task or even from the command line, if mytarget doesn't exist, then  
+I percieve this as a problem with phing. If you refer to an Imported target (namespaced target i.e.   namespaced.mytarget) in "depends", in the <phing /> task or even from the command line, if mytarget doesn't exist, then  
 mytarget from the imported module fills it in, and won't be availalbe at namespaced.mytarget. It's 
 a confusing problem but suffice it to say that the easiest way to work around this is to create
 empty targets for submodule targets. 
@@ -182,7 +182,7 @@ add it like this (vendor/build is the path of how I set up my submodule):
 
     </project>
     
-I use the helpers file to keep utility functions that aren't necessarily needed for building the project
+[I use the helpers file](https://github.com/CodeMeme/Phingistrano/blob/master/build.helpers.example.xml) to keep utility functions that aren't necessarily needed for building the project
 If you look at the build.helpers.example.xml file that I included in this repo, you can see that I'm storing 
 targets that open a VPN tunnel, restart memcached, perform remote commands, etc...
 
@@ -352,7 +352,7 @@ as a dependancy:
 
 Example build.xml
 ---
-my final build.xml looks like this:
+[my final build.xml](https://github.com/CodeMeme/Phingistrano/blob/master/build.example.xml) looks like this:
 
     <?xml version="1.0" encoding="UTF-8"?>
     <project name="Phingistrano" default="help">
@@ -429,8 +429,7 @@ my final build.xml looks like this:
         <property name="deploy.log"        value="2&gt;&amp;1 | tee -a ${deploy.path}/deploy.log" override="true" />
         <property name="deploy.execline"   value="deploy.testing" override="true" />
     </target>
-
-</project>
+    </project>
 
 
 The Modules:
@@ -453,22 +452,26 @@ deploy.branch
 -----
 deploy branch is the branch of your repository that will be used in the deployment
 the default value is "master"  
+
     <property name="deploy.branch"     value="master" />
 
 deploy.user & deploy.password
 -----
-This is the user name and password of the ssh account that will be used during deployment.  
+This is the user name and password of the ssh account that will be used during deployment.
+  
     <property name="deploy.user"       value="myUser" />
     <property name="deploy.password"   value="myPass" />
 
 deploy.path
 -----
 This is the path on the deployment server where your "releases" directory resides  
+
     <property name="deploy.path"       value="/var/www/deployments/application/${deploy.branch}" />
 
 deploy.repository
 -----
 This property holds the address of your git repository.  
+
     <property name="deploy.repository" value="git@github.com:myGithub/${phing.project.name}.git" />
 
 deploy.log
@@ -477,6 +480,7 @@ This is not the file name of your log. This is the logging directive that you ca
 remote shell commands to manage the logging of your deployment. By default the deploy.log 
 value is "2>&1 tee /your/deploy/path/deploy.log". This will make the output get sent to the 
 terminal, but also get logged in the file: "/your/deploy/path/deploy.log"  
+
     <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
 
 deploy.servers
@@ -485,6 +489,7 @@ This is a comma delimited list of the server IPs or host names in which you will
 Make sure that you can ssh to these servers and that the deploy.user is capable of logging in and 
 writing to the deploy.path on all of these servers. If there is only 1 deployment server simply
 write the one IP or hostname.  
+
     <property name="deploy.servers"    value="172.99.99.99, 172.98.98.98" />
 
 defining a deployment strategy
@@ -521,6 +526,7 @@ requires that the remote server has phing and all the necessary dependencies for
 routine.
 
 hybrid needs the following properties in addition to the rest of the deploy properties  
+
     <property name="deploy.remote"     value="172.97.97.97" />
     <property name="deploy.remotedir"  value="~" />
     <property name="deploy.execline"   value="deploy.production" />
@@ -544,6 +550,7 @@ If the file doesn't exist then the bootstrap will be created automatically, so d
 about it if your project unit tests don't require bootstrapping. As long as this property is 
 defind and phing can write to the directory, this bootstrap file will be created with an empty 
 directive.  
+
     <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
 
 version
@@ -552,6 +559,7 @@ version.to and version.from
 ----
 The version.to property is the email address which the notification will be sent to on a new version.  
 version.from is the email address of who or what the mail will be sent from.   
+
     <property name="version.to"        value="you@yourdomain.com" />
     <property name="version.from"      value="build-robot@yourdomain.com" />
 
@@ -562,6 +570,7 @@ sniff.standard
 This will set the sniff standard for which PHP Codesniffer will use when it makes a pass over
 your code. This can be one of the commonly used standards like PEAR or Zend or it can be the  
 path to a custom ruleset.xml file.  
+
     <property name="sniff.standard"    value="${project.basedir}/library/MyLib" />
 
 docs
@@ -569,6 +578,7 @@ docs
 docs.library
 ----  
 This should be a path to a library folder that you may want the documentor to make a pass over  
+
     <property name="docs.library"      value="${project.basedir}/library/Forms" />    
 
         
