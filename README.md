@@ -17,7 +17,7 @@ A PHP utility for building and deploying projects based on Phing and other paral
 * [Gotchas][gotchas]
 * [About][about]  
 
-[overview]: #overview
+[overview]: https://github.com/CodeMeme/Phingistrano/#overview
 ## Common build and deploy repository ##
 This is an attempt to keep all of our build utilities in a common centralized repository that can be loaded as a submodule. The hope is that we can add this submodule to any existing project and immediately use its build/deploy functionality, pending some property/configuration changes.  
 
@@ -25,14 +25,14 @@ Phingistrano tries to be flexible by loading it's individual components as modul
 
 It's important to understand that by this paradigm, you must tailor your buid.xml to the project, and import these submodules as needed. If you need customized versions of individual components, you could simply override or use different tasks defined in your build.xml, or even better, [import a custom build.helpers.xml](https://github.com/CodeMeme/Phingistrano/blob/master/build.helpers.example.xml) . In the examples I've shown, the targets are just aggregated targets from within the modules, strung together with the *depends* attribute. If you look at how it's done, you will likely see how easy, clean and flexible this is.  
 
-[commandline]: #commandline
+[commandline]: https://github.com/CodeMeme/Phingistrano/#commandline
 ## Command line usage ##
 
 * phing help (lists the available targets in the project and modules)
 * phing [ target ]  executes a target in the main project
 * phing [ module ].[ target ] executes a target in a submodule
 
-[dependencies]: #dependencies
+[dependencies]: https://github.com/CodeMeme/Phingistrano/#dependencies
 ## Installing Phing and dependencies ##
 
 This repository uses phing, git and several phing and php extensions which are required
@@ -135,7 +135,7 @@ Once you've installed the SSH2 library, install the PHP extension with PECL
 The ssh2 extension might not add itself to the php ini. 
 I've found that I usually have to link it up manually.
 
-[submodule]: #submodule
+[submodule]: https://github.com/CodeMeme/Phingistrano/#submodule
 ## Adding Phingistrano to a project as a git submodule ##
 
     git submodule init
@@ -153,7 +153,7 @@ Add the submodule pathing to your .gitmodule file:
     git submodule update
 
 
-[build]: #build
+[build]: https://github.com/CodeMeme/Phingistrano/#build
 ## Creating a build file ##
 
 The way this repository is used is that it's grafted into your project as a git submodule.
@@ -430,14 +430,14 @@ as a dependency:
     </target>
     </project>
 
-[modules]: #modules
+[modules]: https://github.com/CodeMeme/Phingistrano/#modules
 ## The Modules ##
 
 For each module that you use, there are certain properties that may be required. 
 In your main build file, you should control the modules with these properties. I will 
 attempt to outline what the properties are and what they do.  
 
-[deploy]: #deploy
+[deploy]: https://github.com/CodeMeme/Phingistrano/#deploy
 ### Deploy ###
 
 * phing deploy.staging { deploys the users current branch to staging }
@@ -529,7 +529,7 @@ hybrid needs the following properties in addition to the rest of the deploy prop
     <property name="deploy.remotedir"  value="~" />
     <property name="deploy.execline"   value="deploy.production" />
     
-[rollback]: #rollback
+[rollback]: https://github.com/CodeMeme/Phingistrano/#rollback
 ### Rollback ###
 
 #### Command line usage ####
@@ -539,7 +539,7 @@ hybrid needs the following properties in addition to the rest of the deploy prop
 * phing rollback.getlist { displays a list of available deployments ranging from most recent to oldest identify the list as numbers 1-5 or whatever }
 * phing rollback.test -Drollback.selected=[ #number 1-5 ] { selects a specific deployment from the list (if less than 2 it will be 1, if more than max it will be max) }
 
-[test]: #test
+[test]: https://github.com/CodeMeme/Phingistrano/#test
 ### Test ###
 
 #### test.bootstrap ####
@@ -552,7 +552,7 @@ directive.
 
     <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />  
 
-[version]: #version
+[version]: https://github.com/CodeMeme/Phingistrano/#version
 ### Version ###
 
 #### version.to and version.from ####
@@ -563,7 +563,7 @@ version.from is the email address of who or what the mail will be sent from.
     <property name="version.to"        value="you@yourdomain.com" />
     <property name="version.from"      value="build-robot@yourdomain.com" />  
     
-[sniff]: #sniff
+[sniff]: https://github.com/CodeMeme/Phingistrano/#sniff
 ### Sniff ###
 
 #### sniff.standard ####
@@ -574,7 +574,7 @@ path to a custom ruleset.xml file.
 
     <property name="sniff.standard"    value="${project.basedir}/library/MyLib" />  
     
-[docs]: #docs
+[docs]: https://github.com/CodeMeme/Phingistrano/#docs
 ## Docs ###
 
 #### docs.library ####
@@ -583,7 +583,7 @@ This should be a path to a library folder that you may want the documentor to ma
 
     <property name="docs.library"      value="${project.basedir}/library/Forms" />    
     
-[gotchas]: #gotchas
+[gotchas]: https://github.com/CodeMeme/Phingistrano/#gotchas
 ##Gotchas ##
   
 ### namespaced submodules won't work if a base target doesn't exist ###
@@ -596,7 +596,7 @@ due to this percieved problem, you have to have an empty target in your main bui
 
 A ticket/CR has been submitted to phing.tigris to have this fixed. The ticket # is 620.
 
-[about]: #about
+[about]: https://github.com/CodeMeme/Phingistrano/#about
 ## About ##
 
 This code was developed by Codememe. Codememe is:  
