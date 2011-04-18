@@ -627,16 +627,18 @@ A ticket/CR has been submitted to phing.tigris to have this fixed. The ticket # 
 ## About ##
 
 This code was developed by Codememe. Codememe is:  
-*Eric Clemmons* 
-*Evan Kaufman*
-*Jesse Greathouse*
+
+* *Eric Clemmons*
+* *Evan Kaufman*
+* *Jesse Greathouse*
    
 Special thanks to these technologies and those who product them:  
-Phing
-Git
-Github
-PHPDocumentor
-PHPUnit
-PHP Codesniffer
-SSH2
-PHP
+
+* Phing
+* Git
+* Github
+* PHPDocumentor
+* PHPUnit
+* PHP Codesniffer
+* SSH2
+* PHP
