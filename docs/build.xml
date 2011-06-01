@@ -5,32 +5,51 @@
     <!-- (DEFAULT) Target: info                       -->
     <!-- ============================================ -->
     <target name="info" >
-    
+
         <php function="dirname" returnProperty="docs.basedir">
             <param value="${phing.file.docs}" />
         </php>
-        <exec dir="${docs.basedir}" 
-              outputProperty="targets" 
+        <exec dir="${docs.basedir}"
+              outputProperty="targets"
               command="phing -list -quiet" />
         <echo msg="${targets}" />
-        
+
     </target>
-    
+
     <target name="help"  depends="info" />
 
     <!-- ============================================  -->
     <!-- Target: doc                                   -->
     <!-- ============================================  -->
     <target name="do" >
-    
-        <phpdoc title="Forms Documentation"
-                destdir="${project.basedir}/build/docs"
+
+        <property name="docs.destdir"        value="${project.basedir}/build/docs" />
+        <property name="docs.appdir"         value="${project.basedir}/application" />
+        <property name="docs.library"        value="${project.basedir}/lib" />
+        <property name="docs.defaultpackage" value="${phing.project.name}" />
+
+        <available file="${docs.destdir}" property="destexists" value="Yes"/>
+
+        <!-- create a documents folder if it doesnt exist -->
+        <if>
+            <not>
+                <equals arg1="${destexists}" arg2="1" />
+            </not>
+            <then>
+                <mkdir dir="${docs.destdir}" />
+            </then>
+        </if>
+
+        <phpdoc title="${phing.project.name} Documentation"
+                destdir="${docs.destdir}"
                 sourcecode="false"
                 output="HTML:frames:DOM/earthli"
-                quiet="true">
-                
+                quiet="true"
+                defaultpackagename="${docs.defaultpackage}"
+                ignore="${docs.ignore}" >
+
             <!-- sweeps the application directory for php files -->
-            <fileset dir="${project.basedir}/application">
+            <fileset dir="${docs.appdir}">
                 <include name="**/*.php" />
             </fileset>
 
@@ -38,9 +57,9 @@
             <fileset dir="${docs.library}">
                 <include name="**/*.php" />
             </fileset>
-            
+
         </phpdoc>
-        
+
     </target>
 
 </project>

@@ -62,15 +62,19 @@ Git is currently the only repository system supported by this package.
 
 ### PHP Codesniffer ###
 
+    sudo pear install PHP_CodeSniffer-1.3.0a1
+
 I could not get phing 2.4.4 to work with this version (1.3.0.RC1) of phpcs.
 Phing seems to want to use the "-o" flag with phpcs and the error message suggest that 
 1.3.0.RC1 does not support that flag. Therefore I recommend using version PHP_CodeSniffer-1.3.0a1
 [PHP_CodeSniffer-1.3.0a1](http://pear.php.net/PHP_CodeSniffer) 
-    sudo pear install PHP_CodeSniffer-1.3.0a1
 
 ### PHPUnit ###
 
 [PHPUnit by Sebasian Bergmann](https://github.com/sebastianbergmann/phpunit/)
+
+*Warning* phing will not currently work with phpunit 3.5, only phpunit 3.4 and lower is supported.
+
 The PEAR channel (`pear.phpunit.de`) that is used to distribute PHPUnit needs to be registered with the local PEAR environment. Furthermore, components that PHPUnit depends upon are hosted on additional PEAR channels.
 
     pear channel-discover pear.phpunit.de
@@ -101,42 +105,33 @@ Also included in the repo, these phing git extensions by Evan Kaufman:
     sudo pear install pear/Mail
     sudo pear install pear/Mail_Mime
 
-### ssh2 bindings ###
+### SSH2 PHP Extension ###
 
-This repo needs the php ssh2 extension. This has been a difficult extension to install on 
-Ubuntu, but on fedora and redhat it was fairly straightforward
+This repo needs the php ssh2 extension. 
+I have 2 sets of instructions for installing this depending on the operating system so only follow 1 set of instructions as it applies to the system  you are on.
 
-#### Install ssh2 library on Fedora 13 &RHEL 6 ####
+### Install ssh2 library on Fedora 13+ &RHEL 6+ ###
 
     yum install libssh2-devel
 
-#### Install ssh2 library on Ubuntu 10 ####
 
-##### first make sure you have the libssh developer library #####
+### Install ssh2 library on Ubuntu 10.10+ ###
 
-    sudo apt-get install libssh-dev
+##### Install the PHP Bindings for libssh2 #####
 
-##### libtool #####
-
-    sudo apt-get install libtool automake autoconf autotools-dev
+    sudo apt-get install libssh2-1-dev
 
 ##### then download and install the ssh2 library with git #####
 
-    cd /usr/share
-    sudo git clone git://git.libssh2.org/libssh2.git
-    cd libssh2
-    sudo ./buildconf
-    sudo ./configure
-    sudo make
-    sudo make install
+    PHP Bindings for libssh2
 
-##### SSH2 PHP Extension ######
+### SSH2 PHP Extension (all operating systems) ###
 
 Once you've installed the SSH2 library, install the PHP extension with PECL  
 
     sudo pecl install channel://pecl.php.net/ssh2-0.11.2
 
-##### Configure extension #####
+#### Configure extension ####
 
 The ssh2 extension might not add itself to the php ini. 
 I've found that I usually have to link it up manually.

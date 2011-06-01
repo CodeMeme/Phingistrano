@@ -6,7 +6,7 @@
     <import file="${project.basedir}/build.helpers.xml" />
 
     <!-- Required properties -->
-    <property name="deploy.strategy"   value="hybrid" />
+    <property name="deploy.strategy"   value="distributed" />
     <property name="deploy.remote"     value="172.99.99.91" />
     <property name="deploy.remotedir"  value="~/${phing.project.name}" />
     <property name="deploy.execline"   value="deploy.production" />
@@ -45,7 +45,7 @@
             description="Rolls back a production release." />
 
     <target name="deploy.staging"
-            depends="staging.properties, deploy.do"
+             depends="staging.properties, deploy.do"
             description="Deploys the current branch to staging." />
 
     <target name="rollback.staging"

@@ -33,13 +33,16 @@
    <target name="remote.staging"
             depends="staging.properties, deploy.remote"
             description="Interactive prompt to execute a command on the staging server" />
-    
+
     <!-- target shortcuts -->
-    <target name="test"         depends="test.do"   />
-    <target name="docs"         depends="docs.do"   />
-    <target name="sniff"        depends="sniff.do"  />
-    <target name="staging"      depends="deploy.staging" />
-    <target name="production"   depends="deploy.production" />
+    <target name="test"             depends="test.do"   />
+    <target name="docs"             depends="docs.do"   />
+    <target name="sniff"            depends="sniff.do"  />
+    <target name="staging"          depends="deploy.staging" />
+    <target name="production"       depends="deploy.production" />
+    <target name="checkout.develop" depends="version.checkoutdevelop" />
+    <target name="checkout.master"  depends="version.checkoutmaster" />
+    <target name="git.pull"         depends="version.pull" />
     <target name="snack" ><echo>nom nom nom...</echo></target>
 
 </project>

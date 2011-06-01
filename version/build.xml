@@ -38,6 +38,34 @@
     </target>
 
     <!-- ============================================  -->
+    <!-- Target: checkoutdevelop                       -->
+    <!-- ============================================  -->
+    <target name="checkoutdevelop">
+        <gitcheckout repository="${repo.dir}"
+                 branchname="develop"
+                 quiet="false" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: checkoutmaster                        -->
+    <!-- ============================================  -->
+    <target name="checkoutmaster">
+        <gitcheckout repository="${repo.dir}"
+                 branchname="master"
+                 quiet="false" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: pull                                  -->
+    <!-- ============================================  -->
+    <target name="pull">
+        <gitpull repository="${repo.dir}"
+                 force="true"
+                 quiet="false"
+                 all="true" />
+    </target>
+
+    <!-- ============================================  -->
     <!-- Target: tag                                   -->
     <!-- ============================================  -->
     <target name="tag">

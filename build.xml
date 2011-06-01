@@ -23,8 +23,8 @@
     </target>
     <!-- shortcut to help -->
     <target name="info" depends="help" />
-    
-    
+
+
     <!-- generic declarations -->
     <!--
          These have to be here for submodule targets.
@@ -50,10 +50,14 @@
     <target name="deliver" />
     <target name="upload" />
     <target name="download" />
+    <target name="pushtags" />
     <target name="memcached" />
     <target name="memcachedump" />
     <target name="getlist" />
     <target name="remote" />
     <target name="remotecmd" />
+    <target name="checkoutdevelop" />
+    <target name="checkoutmaster" />
+    <target name="pull" />
 
 </project>
