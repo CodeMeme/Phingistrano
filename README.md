@@ -123,7 +123,7 @@ I have 2 sets of instructions for installing this depending on the operating sys
 
 ##### then download and install the ssh2 library with git #####
 
-    PHP Bindings for libssh2
+    sudo apt-get install libssh2-php
 
 ### SSH2 PHP Extension (all operating systems) ###
 
