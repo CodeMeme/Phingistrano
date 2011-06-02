@@ -253,10 +253,15 @@ For my example, I will show you how you should add the properties to your build 
     <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
     <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
+    <property name="test.dir"          value="${project.basedir}/src" />
+    <property name="test.incpattern"   value="**/*Test.php" />
+    <property name="test.excpattern"   value="" />
     <property name="version.to"        value="jesse@codememe.com" />
     <property name="version.from"      value="robot@codememe.com" />
-    <property name="sniff.standard"    value="Pear" />
-    <property name="docs.library"      value="${project.basedir}/library" />
+    <property name="sniff.standard"    value="PEAR" />
+    <property name="docs.destdir"      value="${project.basedir}/build/docs" />
+    <property name="docs.appdir"       value="${project.basedir}/app" />
+    <property name="docs.library"      value="${project.basedir}/src" />
 
     </project>
 
@@ -285,10 +290,15 @@ that you enter on the command line when you use phing. i.e : $phing [ target ]
     <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
     <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
+    <property name="test.dir"          value="${project.basedir}/src" />
+    <property name="test.incpattern"   value="**/*Test.php" />
+    <property name="test.excpattern"   value="" />
     <property name="version.to"        value="jesse@codememe.com" />
     <property name="version.from"      value="robot@codememe.com" />
-    <property name="sniff.standard"    value="Pear" />
-    <property name="docs.library"      value="${project.basedir}/library" />    
+    <property name="sniff.standard"    value="PEAR" />
+    <property name="docs.destdir"      value="${project.basedir}/build/docs" />
+    <property name="docs.appdir"       value="${project.basedir}/app" />
+    <property name="docs.library"      value="${project.basedir}/src" />
 
     <!-- Main Targets -->
     <target name="help"
@@ -377,10 +387,15 @@ as a dependency:
     <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
     <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
+    <property name="test.dir"          value="${project.basedir}/src" />
+    <property name="test.incpattern"   value="**/*Test.php" />
+    <property name="test.excpattern"   value="" />
     <property name="version.to"        value="jesse@codememe.com" />
     <property name="version.from"      value="robot@codememe.com" />
-    <property name="sniff.standard"    value="Pear" />
-    <property name="docs.library"      value="${project.basedir}/library" />    
+    <property name="sniff.standard"    value="PEAR" />
+    <property name="docs.destdir"      value="${project.basedir}/build/docs" />
+    <property name="docs.appdir"       value="${project.basedir}/app" />
+    <property name="docs.library"      value="${project.basedir}/src" />   
 
     <!-- Main Targets -->
     <target name="help"
@@ -562,7 +577,28 @@ about it if your project unit tests don't require bootstrapping. As long as this
 defind and phing can write to the directory, this bootstrap file will be created with an empty 
 directive.  
 
-    <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />  
+    <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" /> 
+
+#### test.dir ####
+
+Will assign a directory for php unit to traverse looking for unit tests.
+At this time only one directory is supported. Set it to a higher directory if you can use multiple directories recursively.
+
+    <property name="test.dir"          value="${project.basedir}/src" />
+
+#### test.incpattern ####
+
+The pattern of files to include when looking for unit tests. Defaults to the value in the example.
+At this time only one line of inclusion is supported.
+
+    <property name="test.incpattern"   value="**/*Test.php" />
+
+#### test.excpattern ####
+
+The pattern of files to exclude when looking for unit tests.
+At this time only one line of exclusion is supported.
+
+    <property name="test.excpattern"   value="" /> 
 
 <a name="version" />
 
@@ -595,11 +631,24 @@ path to a custom ruleset.xml file.
 [docs]: #docs
 ## Docs ###
 
+#### docs.destdir ####
+
+This is the directory that your docs will be generated in.
+
+    <property name="docs.destdir"       value="${project.basedir}/build/docs" /> 
+
 #### docs.library ####
 
-This should be a path to a library folder that you may want the documentor to make a pass over  
+This should be a path to a library folder that you may want the documentor to make a pass over
+    
+    <property name="docs.library"      value="${project.basedir}/src" />
+    
+#### docs.appdir ####
 
-    <property name="docs.library"      value="${project.basedir}/library/Forms" />    
+This should be a path to your application directory
+
+    <property name="docs.appdir"       value="${project.basedir}/app" />
+
 
 <a name="gotchas" />
  

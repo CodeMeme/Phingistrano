@@ -18,10 +18,15 @@
     <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
     <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
+    <property name="test.dir"          value="${project.basedir}/src" />
+    <property name="test.incpattern"   value="**/*Test.php" />
+    <property name="test.excpattern"   value="" />
     <property name="version.to"        value="jesse@codememe.com" />
     <property name="version.from"      value="robot@codememe.com" />
-    <property name="sniff.standard"    value="Pear" />
-    <property name="docs.library"      value="${project.basedir}/library" />    
+    <property name="sniff.standard"    value="PEAR" />
+    <property name="docs.destdir"      value="${project.basedir}/build/docs" />
+    <property name="docs.appdir"       value="${project.basedir}/app" />
+    <property name="docs.library"      value="${project.basedir}/src" />    
 
     <!-- Main Targets -->
     <target name="help"

@@ -85,6 +85,12 @@
         </if>
 
         <!-- set default unit test properties -->
+        <property name="test.dir"          value="${project.basedir}" />
+        
+        <property name="test.incpattern"   value="**/*Test.php" />
+        
+        <property name="test.excpattern"   value="" />
+        
         <property name="test.type" value="xml" />
         
         <property name="test.usefile" value="true" />
@@ -106,8 +112,9 @@
             <formatter type="plain" usefile="no" />
             
             <batchtest>
-                <fileset dir="${project.basedir}/tests">
-                    <include name="**/*Test.php"/>
+                <fileset dir="${test.dir}">
+                    <include name="${test.incpattern}"/>
+                    <exclude name="${test.excpattern}"/>
                 </fileset>
             </batchtest>
             
