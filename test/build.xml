@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="test" description="testing" default="do" >
 
+    <property name="build.target"        value=".build" />
+    
     <!-- ============================================ -->
     <!-- (DEFAULT) Target: info                       -->
     <!-- ============================================ -->
@@ -23,7 +25,7 @@
     <!-- ============================================  -->
     <target name="prepare" >
     
-        <available file="${project.basedir}/build/reports" 
+        <available file="${project.basedir}/${build.target}/reports" 
                    property="test.reportsexists" 
                    value="true" />
         <if>
@@ -32,7 +34,7 @@
 	        </not>
             <then>
                 <!-- create required directories -->
-                <mkdir dir="${project.basedir}/build/reports" />
+                <mkdir dir="${project.basedir}/${build.target}/reports" />
             </then>
         </if>
         
@@ -105,7 +107,7 @@
                  haltonfailure="${test.haltfail}"
                  haltonerror="${test.halterror}" >
                  
-            <formatter todir="${project.basedir}/build/reports"
+            <formatter todir="${project.basedir}/${build.target}/reports"
                        type="${test.type}"
                        usefile="${test.usefile}" />
                        

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="sniff" description="Maximum Sniffage detected" default="do" >
 
+    <property name="build.target"        value=".build" />
+    
     <!-- ============================================ -->
     <!-- (DEFAULT) Target: info                       -->
     <!-- ============================================ -->
@@ -31,7 +33,7 @@
             <equals arg1="${sniff.standard}" arg2="notset" />
             <then>
                 <phpcodesniffer file="${project.basedir}"
-                        ignorePatterns="build,library/Doctrine,vendor,Sniff.php"
+                        ignorePatterns="${build.target},library/Doctrine,vendor,Sniff.php"
                         allowedFileExtensions="php"
                         showSniffs="true" >
                         
@@ -41,14 +43,14 @@
 
                     <!-- prints output to a file in checkstyle standard -->
                     <formatter type="checkstyle" 
-                               outfile="${project.basedir}/build/checkstyle.xml" />
+                               outfile="${project.basedir}/${build.target}/checkstyle.xml" />
                     
                 </phpcodesniffer>
             </then>
             <else>
                 <phpcodesniffer standard="${sniff.standard}"
                         file="${project.basedir}"
-                        ignorePatterns="build,library/Doctrine,vendor,Sniff.php"
+                        ignorePatterns="${build.target},library/Doctrine,vendor,Sniff.php"
                         allowedFileExtensions="php"
                         showSniffs="true" >
                         
@@ -57,7 +59,7 @@
                                usefile="false" />
                     <!-- prints output to a file in checkstyle standard -->
                     <formatter type="checkstyle" 
-                               outfile="${project.basedir}/build/checkstyle.xml" />
+                               outfile="${project.basedir}/${build.target}/checkstyle.xml" />
                                
                 </phpcodesniffer>
             </else>

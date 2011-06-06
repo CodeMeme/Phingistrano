@@ -6,6 +6,7 @@
     <import file="${project.basedir}/build.helpers.xml" />
 
     <!-- Required properties -->
+    <property name="build.target"      value=".build" />
     <property name="deploy.strategy"   value="distributed" />
     <property name="deploy.remote"     value="172.99.99.91" />
     <property name="deploy.remotedir"  value="~/${phing.project.name}" />
