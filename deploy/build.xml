@@ -3,6 +3,7 @@
 
     <!-- global deploy properties -->
     <property name="deploy.cacheexists"  value="false" override="true" />
+    <property name="build.target"        value=".build" />
 
     <!-- ============================================ -->
     <!-- (DEFAULT) Target: info                       -->
@@ -70,19 +71,19 @@
     <target name="distributed" depends="deploy.prepare.distributed" >
 
         <!-- fetch origin -->
-        <exec dir="${project.basedir}/build/cached-copy"
+        <exec dir="${project.basedir}/${build.target}/cached-copy"
               outputProperty="fetchresult"
               command="git fetch origin" />
 
         <!-- resolve revision hash -->
-        <exec dir="${project.basedir}/build/cached-copy"
+        <exec dir="${project.basedir}/${build.target}/cached-copy"
               outputProperty="deploy.revision"
               command="git rev-parse origin/${deploy.branch}" />
 
         <echo msg="resolved revision of ${deploy.branch} as: ${deploy.revision}" />
 
         <!-- checkout revision -->
-        <exec dir="${project.basedir}/build/cached-copy"
+        <exec dir="${project.basedir}/${build.target}/cached-copy"
               outputProperty="resetresult"
               command="git checkout -f ${deploy.revision}" />
 
@@ -94,7 +95,7 @@
         </php>
 
         <exec outputProperty="submodulesyncresult"
-              dir="${project.basedir}/build/cached-copy"
+              dir="${project.basedir}/${build.target}/cached-copy"
               command="for mod in `git submodule status | awk '{ print $2 }'`; do
                         git config -f .git/config submodule.&#36;{mod}.url
                         `git config -f .gitmodules --get submodule.&#36;{mod}.url`;
@@ -103,14 +104,14 @@
 
         <!-- Update Submodules -->
         <exec outputProperty="submoduleupdateresult"
-              dir="${project.basedir}/build/cached-copy"
+              dir="${project.basedir}/${build.target}/cached-copy"
               command="git submodule update" />
 
-        <exec command="cp -R ${project.basedir}/build/cached-copy
-                       ${project.basedir}/build/tmp" />
+        <exec command="cp -R ${project.basedir}/${build.target}/cached-copy
+                       ${project.basedir}/${build.target}/tmp" />
 
         <!-- strip git overhead -->
-	    <exec dir="${project.basedir}/build/tmp"
+	    <exec dir="${project.basedir}/${build.target}/tmp"
 	          command="for i in `find . -name .git` ; do
 	                    rm -rf $i;
 	                   done"  />
@@ -129,17 +130,17 @@
             <param value="${deploy.tarball}" />
         </php>
 
-        <tar destfile="${project.basedir}/build/tarballs/${deploy.tarball}"
-             basedir="${project.basedir}/build/tmp"
+        <tar destfile="${project.basedir}/${build.target}/tarballs/${deploy.tarball}"
+             basedir="${project.basedir}/${build.target}/tmp"
              compression="gzip" />
 
-        <delete dir="${project.basedir}/build/tmp"
+        <delete dir="${project.basedir}/${build.target}/tmp"
                 includeemptydirs="true"
                 verbose="false"
                 failonerror="false" />
 
     <!-- echo info about the package -->
-	<filesize file="${project.basedir}/build/tarballs/${deploy.tarball}" />
+	<filesize file="${project.basedir}/${build.target}/tarballs/${deploy.tarball}" />
         <php expression="floor(${filesize}/1024)" returnProperty="ksize" />
         <php expression="floor(${filesize}/1024/1024)" returnProperty="msize" />
         <echo msg="Filesize is: ${ksize} Kb"/>
@@ -175,7 +176,7 @@
              password="${deploy.password}"
              host="${deploy.server}"
              command="cp ${deploy.path}/deploy.log
-                      ${deploy.path}/build/logs/deploy/${deploy.ts}.deploy.log;
+                      ${deploy.path}/${build.target}/logs/deploy/${deploy.ts}.deploy.log;
                       cp ${deploy.path}/deploy.log
                       ${deploy.path}/releases/${deploy.ts}/log/${deploy.ts}.deploy.log;
                       rm ${deploy.path}/deploy.log; " />
@@ -191,7 +192,7 @@
          <ssh username="${deploy.user}"
               password="${deploy.password}"
               host="${deploy.server}"
-              command="(cd ${deploy.path}/build/cached-copy &amp;&amp;
+              command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                        phing ${deploy.execline}
                        -Ddeploy.strategy=distributed
                        -Ddeploy.branch=${deploy.branch})
@@ -202,7 +203,7 @@
               password="${deploy.password}"
               host="${deploy.server}"
               command="cp ${deploy.path}/deploy.log
-                       ${deploy.path}/build/logs/deploy/${deploy.ts}.deploy.log;
+                       ${deploy.path}/${build.target}/logs/deploy/${deploy.ts}.deploy.log;
                        rm ${deploy.path}/deploy.log; " />
     </target>
 
@@ -211,7 +212,7 @@
     <!-- ============================================  -->
     <target name="prepare.distributed" >
 
-        <available file="${project.basedir}/build/cached-copy"
+        <available file="${project.basedir}/${build.target}/cached-copy"
                    property="deploy.cacheexists"
                    value="true"/>
 
@@ -219,20 +220,20 @@
             <isfalse value="${deploy.cacheexists}"/>
             <then>
                 <!-- create required directories -->
-                <mkdir dir="${project.basedir}/build" />
-                <mkdir dir="${project.basedir}/build/tarballs" />
-                <mkdir dir="${project.basedir}/build/logs/deploy" />
+                <mkdir dir="${project.basedir}/${build.target}" />
+                <mkdir dir="${project.basedir}/${build.target}/tarballs" />
+                <mkdir dir="${project.basedir}/${build.target}/logs/deploy" />
 
                 <!-- clone repository -->
                 <exec outputProperty="cloneresult"
                       command="git clone -q --depth 1 ${deploy.repository}
-                               ${project.basedir}/build/cached-copy" />
+                               ${project.basedir}/${build.target}/cached-copy" />
 
                 <echo msg="${cloneresult}" />
 
                 <!-- Init Submodules -->
                 <exec outputProperty="submoduleinitresult"
-                      dir="${project.basedir}/build/cached-copy"
+                      dir="${project.basedir}/${build.target}/cached-copy"
                       command="git submodule init" />
 
                 <echo msg="${submoduleinitresult}"/>
@@ -249,22 +250,22 @@
         <ssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
-             command="if [ ! -d ${deploy.path}/build/cached-copy ]; then
+             command="if [ ! -d ${deploy.path}/${build.target}/cached-copy ]; then
                         git clone -q --depth 1 ${deploy.repository}
-                        ${deploy.path}/build/cached-copy ${deploy.log};
-                        (cd ${deploy.path}/build/cached-copy &amp;&amp;
+                        ${deploy.path}/${build.target}/cached-copy ${deploy.log};
+                        (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                         git submodule init) ${deploy.log};
                       fi; " />
 
         <ssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
-             command="mkdir -p ${deploy.path}/build/tarballs ${deploy.log};" />
+             command="mkdir -p ${deploy.path}/${build.target}/tarballs ${deploy.log};" />
 
         <ssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
-             command="mkdir -p ${deploy.path}/build/logs/deploy ${deploy.log};" />
+             command="mkdir -p ${deploy.path}/${build.target}/logs/deploy ${deploy.log};" />
 
         <ssh username="${deploy.user}"
              password="${deploy.password}"
@@ -296,22 +297,22 @@
         <ssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
-             command="(cd ${deploy.path}/build/cached-copy &amp;&amp;
+             command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                       git fetch origin) ${deploy.log};
                       echo Found current branch is ${deploy.branch} ${deploy.log};
-                      (cd ${deploy.path}/build/cached-copy &amp;&amp;
+                      (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                       REV=$(git rev-parse origin/${deploy.branch}) &amp;&amp;
                       echo Found revision is $REV &amp;&amp;
-                      cd ${deploy.path}/build/cached-copy &amp;&amp;
+                      cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                       git checkout -f $REV) ${deploy.log}; " />
 
         <!-- reset submodules to their appropriate revisions -->
         <ssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
-             command="for mod in `(cd ${deploy.path}/build/cached-copy &amp;&amp;
+             command="for mod in `(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                       git submodule status | awk '{ print $2 }')`; do
-                        (cd ${deploy.path}/build/cached-copy &amp;&amp;
+                        (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                         git config -f .git/config submodule.&#36;{mod}.url
                         `git config -f .gitmodules --get submodule.&#36;{mod}.url`)
                         ${deploy.log};
@@ -321,7 +322,7 @@
         <ssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
-             command="(cd ${deploy.path}/build/cached-copy &amp;&amp;
+             command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                        git submodule update) ${deploy.log}; " />
 
         <!-- make deployment directory and tarball archive -->
@@ -329,16 +330,16 @@
              password="${deploy.password}"
              host="${deploy.server}"
              command="mkdir ${deploy.path}/releases/${deploy.ts} ${deploy.log};
-                      cp -R ${deploy.path}/build/cached-copy/*
+                      cp -R ${deploy.path}/${build.target}/cached-copy/*
                       ${deploy.path}/releases/${deploy.ts} ${deploy.log};
                       for i in `find ${deploy.path}/releases/${deploy.ts} -name .git` ; do
                         rm -rf $i ${deploy.log};
                       done;
-                      rm -rf ${deploy.path}/releases/${deploy.ts}/build ${deploy.log};
-                      (cd ${deploy.path}/build/cached-copy &amp;&amp;
+                      rm -rf ${deploy.path}/releases/${deploy.ts}/${build.target} ${deploy.log};
+                      (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                       REV=$(git rev-parse origin/${deploy.branch}) &amp;&amp;
                       echo $REV > ${deploy.path}/releases/${deploy.ts}/REVISION);
-                      tar czf ${deploy.path}/build/tarballs/${deploy.tarball}
+                      tar czf ${deploy.path}/${build.target}/tarballs/${deploy.tarball}
                       ${deploy.path}/releases/${deploy.ts} ${deploy.log};"/>
 
         <!-- print filesize info -->
@@ -347,7 +348,7 @@
               host="${deploy.server}"
               command="echo File size ${deploy.log};
                        echo ============== ${deploy.log};
-                       B=$(stat -c %s ${deploy.path}/build/tarballs/${deploy.tarball});
+                       B=$(stat -c %s ${deploy.path}/${build.target}/tarballs/${deploy.tarball});
                        KB=$(($B / 1024));
                        echo $KB Kb ${deploy.log};
                        MB=$(($KB / 1024));
@@ -419,7 +420,7 @@
     <!-- ============================================  -->
     <target name="upload" >
 
-        <echo msg="uploading: ${project.basedir}/build/tarballs/${deploy.tarball}" />
+        <echo msg="uploading: ${project.basedir}/${build.target}/tarballs/${deploy.tarball}" />
 
         <echo msg="to server: ${deploy.server}" />
 
@@ -427,7 +428,7 @@
              password="${deploy.password}"
              host="${deploy.server}"
              todir="${deploy.path}"
-             file="${project.basedir}/build/tarballs/${deploy.tarball}" />
+             file="${project.basedir}/${build.target}/tarballs/${deploy.tarball}" />
 
     </target>
 
@@ -465,7 +466,7 @@
     <!-- ============================================  -->
     <target name="clean" >
 
-        <delete dir="${project.basedir}/build/cached-copy" />
+        <delete dir="${project.basedir}/${build.target}/cached-copy" />
 
     </target>
 

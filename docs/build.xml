@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="docs" description="documentation" default="do" >
 
+    <property name="build.target"        value=".build" />
+    
     <!-- ============================================ -->
     <!-- (DEFAULT) Target: info                       -->
     <!-- ============================================ -->
@@ -23,7 +25,7 @@
     <!-- ============================================  -->
     <target name="do" >
 
-        <property name="docs.destdir"        value="${project.basedir}/build/docs" />
+        <property name="docs.destdir"        value="${project.basedir}/${build.target}/docs" />
         <property name="docs.appdir"         value="${project.basedir}/application" />
         <property name="docs.library"        value="${project.basedir}/lib" />
         <property name="docs.defaultpackage" value="${phing.project.name}" />

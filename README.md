@@ -241,7 +241,8 @@ For my example, I will show you how you should add the properties to your build 
     <import file="${project.basedir}/build.helpers.xml" />
 
     <!-- Required properties -->
-    <property name="deploy.strategy"   value="hybrid" />
+    <property name="build.target"      value=".build" />
+    <property name="deploy.strategy"   value="distributed" />
     <property name="deploy.remote"     value="172.99.99.91" />
     <property name="deploy.remotedir"  value="~/${phing.project.name}" />
     <property name="deploy.execline"   value="deploy.production" />
@@ -273,7 +274,8 @@ that you enter on the command line when you use phing. i.e : $phing [ target ]
     <import file="${project.basedir}/build.helpers.xml" />
 
     <!-- Required properties -->
-    <property name="deploy.strategy"   value="hybrid" />
+    <property name="build.target"      value=".build" />
+    <property name="deploy.strategy"   value="distributed" />
     <property name="deploy.remote"     value="172.99.99.91" />
     <property name="deploy.remotedir"  value="~/${phing.project.name}" />
     <property name="deploy.execline"   value="deploy.production" />
@@ -365,7 +367,8 @@ as a dependency:
     <import file="${project.basedir}/build.helpers.xml" />
 
     <!-- Required properties -->
-    <property name="deploy.strategy"   value="hybrid" />
+    <property name="build.target"      value=".build" />
+    <property name="deploy.strategy"   value="distributed" />
     <property name="deploy.remote"     value="172.99.99.91" />
     <property name="deploy.remotedir"  value="~/${phing.project.name}" />
     <property name="deploy.execline"   value="deploy.production" />
@@ -441,7 +444,15 @@ as a dependency:
 
 For each module that you use, there are certain properties that may be required. 
 In your main build file, you should control the modules with these properties. I will 
-attempt to outline what the properties are and what they do.  
+attempt to outline what the properties are and what they do.
+
+#### Global properties ####
+
+##### build.target #####
+
+This is the folder that your build related media will appear. By default it creates and uses the folder: .build  
+
+    <property name="build.target"      value=".build" />
 
 <a name="deploy" />
 

@@ -4,6 +4,7 @@
     <property name="rollback.direction" value="reverse"/>
     <property name="rollback.depth" value="1" />
     <property name="rollback.selected" value="false" />
+    <property name="build.target"        value=".build" />
 
     <!-- ============================================ -->
     <!-- (DEFAULT) Target: info                       -->
