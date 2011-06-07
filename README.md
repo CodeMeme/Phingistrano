@@ -73,8 +73,6 @@ Phing seems to want to use the "-o" flag with phpcs and the error message sugges
 
 [PHPUnit by Sebasian Bergmann](https://github.com/sebastianbergmann/phpunit/)
 
-*Warning* phing will not currently work with phpunit 3.5, only phpunit 3.4 and lower is supported.
-
 The PEAR channel (`pear.phpunit.de`) that is used to distribute PHPUnit needs to be registered with the local PEAR environment. Furthermore, components that PHPUnit depends upon are hosted on additional PEAR channels.
 
     pear channel-discover pear.phpunit.de
