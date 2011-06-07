@@ -59,5 +59,7 @@
     <target name="checkoutdevelop" />
     <target name="checkoutmaster" />
     <target name="pull" />
+    <target name="precache" />
+    <target name="postcache" />
 
 </project>

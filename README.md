@@ -476,6 +476,24 @@ This is the folder that your build related media will appear. By default it crea
 * phing deploy.production { deploys master branch to production (always master) }
 * phing deploy.test { deploys the users current branch to test }
 
+#### Deploy Hooks ####
+
+##### postcache #####
+
+Runs a target called "postcache" immediately as the cacheing is completed and before it wraps it into a tarball. This is useful in situations where you may need to run treatment scripts like the vendors script in synfomy:
+
+    <!-- postcache -->
+    <target name="postcache"
+            description="Refreshes the vendors" >
+            <exec dir="${project.basedir}/${build.target}/cached-copy/app"
+                outputProperty="targets"
+                command="bin/vendors.sh --reinstall" />
+    </target>
+
+##### precache #####
+
+Runs a target called "precache" right before you enter in to the repository cacheing part of deploy. This is useful if there are certain treatments, specific to the project, that you need to run before the repository gets cached
+
 #### Deploy properties ####
 
 ##### deploy.branch #####
