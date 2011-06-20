@@ -1,4 +1,4 @@
-# Phingistrano #
+# Phingistrano ![project status](http://stillmaintained.com/CodeMeme/Phingistrano.png) #
 A PHP utility for building and deploying projects based on Phing and other paralell technology.
 
 ## Table of Contents ##
