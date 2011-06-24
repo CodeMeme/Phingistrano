@@ -139,19 +139,21 @@ I've found that I usually have to link it up manually.
 [submodule]: #submodule
 ## Adding Phingistrano to a project as a git submodule ##
 
+    git submodule add git@github.com:CodeMeme/Phingistrano.git vendor/Phingistrano
     git submodule init
-    git submodule add git@github.com:CollegeDegrees/build.git vendor/build
 
-Add the submodule pathing to your .gitmodule file:
+This should automatically create a .gitmodules file for you. If not, you can create
+one manually with the following contents:
 
-    [submodule "vendor/build"]
-            path = vendor/build
-            url = git@github.com:CollegeDegrees/build.git
-
+    [submodule "vendor/Phingistrano"]
+            path = vendor/Phingistrano
+            url = git@github.com:CodeMeme/Phingistrano.git
 
 ### To update the submodule ###
 
     git submodule update
+
+(You should run this once upon sub-repository creation as well.)
 
 <a name="build" />
 
