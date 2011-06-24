@@ -153,6 +153,8 @@ one manually with the following contents:
 
     git submodule update
 
+(You should run this once upon sub-repository creation as well.)
+
 <a name="build" />
 
 [build]: #build
