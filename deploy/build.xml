@@ -105,11 +105,11 @@
               dir="${project.basedir}/${build.target}/cached-copy"
               command="git submodule update" />
 
+       <!-- Post-Cache Hook -->
+       <phingcall target="postcache" />
+
         <exec command="cp -R ${project.basedir}/${build.target}/cached-copy
                        ${project.basedir}/${build.target}/tmp" />
-        
-        <!-- Post-Cache Hook -->
-        <phingcall target="postcache" />
         
         <!-- strip git overhead -->
 	    <exec dir="${project.basedir}/${build.target}/tmp"
