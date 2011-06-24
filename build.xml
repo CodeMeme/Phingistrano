@@ -31,6 +31,11 @@
          To refer to a submodule target with its namespace,
          The target must be declared in this or the main buildfile.
          Phing Ticket #620 has been submitted as a CR.
+
+         update June24 2011:
+         Phing Ticket #620 has been resolved and starting in
+         Phing version 2.5 you will not need this section any more
+         because namespaces will be resolved fully from imported buildfiles
     -->
     <target name="tag" />
     <target name="notify" />

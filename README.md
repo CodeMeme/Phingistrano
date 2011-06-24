@@ -175,7 +175,7 @@ The content of your build.xml should be like this:
 
 Now that you've got your build file, you need to import the modules. The build submodule 
 comes with a main build xml that can be imported if you want to use all the modules. You can 
-add it like this (vendor/build is the path of how I set up my submodule):
+add it like this (vendor/Phingistrano is the path of how I set up my submodule):
 
     <?xml version="1.0" encoding="UTF-8"?>
     <project name="myproject" default="help">
@@ -199,9 +199,9 @@ your main build file by adjusting the path like this:
     <project name="myproject" default="help">
 
     <!-- Imports -->
-    <import file="${project.basedir}/vendor/build/deploy/build.xml" />
-    <import file="${project.basedir}/vendor/build/version/build.xml" />
-    <import file="${project.basedir}/vendor/build/sniff/build.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/deploy/build.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/version/build.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/sniff/build.xml" />
 
     </project>
 
@@ -209,7 +209,7 @@ your main build file by adjusting the path like this:
 If you cherry pick the modules, you may have to put blank targets from each module in your 
 main build file. For example if I used:
 
-    <import file="${project.basedir}/vendor/build/deploy/build.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/deploy/build.xml" />
 
 deploy has targets which are namespaced like this: deploy.distributed, deploy.prepare, etc...
 In my main build file, I would need to create empty targets with those names so that the 
@@ -219,7 +219,7 @@ namespace will work. Like this:
     <project name="myproject" default="help">
 
     <!-- Imports -->
-    <import file="${project.basedir}/vendor/build/deploy/build.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/deploy/build.xml" />
 
     <!-- appendages -->
     <target name="distributed" />
@@ -482,14 +482,14 @@ This is the folder that your build related media will appear. By default it crea
 
 ##### postcache #####
 
-Runs a target called "postcache" immediately as the cacheing is completed and before it wraps it into a tarball. This is useful in situations where you may need to run treatment scripts like the vendors script in synfomy:
+Runs a target called "postcache" immediately as the cacheing is completed and before it wraps it into a tarball. This is useful in situations where you may need to run treatment scripts like the vendors script in Symfony2:
 
     <!-- postcache -->
     <target name="postcache"
             description="Refreshes the vendors" >
             <exec dir="${project.basedir}/${build.target}/cached-copy/app"
                 outputProperty="targets"
-                command="bin/vendors.sh --reinstall" />
+                command="bin/vendors --install" />
     </target>
 
 ##### precache #####

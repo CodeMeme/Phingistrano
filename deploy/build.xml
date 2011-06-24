@@ -165,13 +165,6 @@
                        ln -s ${deploy.path}/releases/${deploy.ts}
                        ${deploy.path}/current ${deploy.log}; " />
 
-         <!-- restart memcached -->
-        <ssh username="${deploy.user}"
-             password="${deploy.password}"
-             host="${deploy.server}"
-             command="echo ${deploy.password} |
-                      sudo -S /etc/init.d/memcached restart ${deploy.log};" />
-
          <!-- deposit the deploy log in the log folder -->
          <ssh username="${deploy.user}"
              password="${deploy.password}"
@@ -419,8 +412,6 @@
              password="${deploy.password}"
              host="${deploy.server}"
              command="echo ${deploy.revision} > ${deploy.path}/current/REVISION" />
-
-        <phingcall target="deploy.memcached" />
 
     </target>
 
