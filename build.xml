@@ -24,47 +24,4 @@
     <!-- shortcut to help -->
     <target name="info" depends="help" />
 
-
-    <!-- generic declarations -->
-    <!--
-         These have to be here for submodule targets.
-         To refer to a submodule target with its namespace,
-         The target must be declared in this or the main buildfile.
-         Phing Ticket #620 has been submitted as a CR.
-
-         update June24 2011:
-         Phing Ticket #620 has been resolved and starting in
-         Phing version 2.5 you will not need this section any more
-         because namespaces will be resolved fully from imported buildfiles
-    -->
-    <target name="tag" />
-    <target name="notify" />
-    <target name="currentbranch" />
-    <target name="clean" />
-    <target name="verbose" />
-    <target name="prepare" />
-    <target name="prepare.distributed" />
-    <target name="prepare.direct" />
-    <target name="prepare.hybrid" />
-    <target name="open" />
-    <target name="do" />
-    <target name="convert" />
-    <target name="distributed" />
-    <target name="direct" />
-    <target name="hybrid" />
-    <target name="deliver" />
-    <target name="upload" />
-    <target name="download" />
-    <target name="pushtags" />
-    <target name="memcached" />
-    <target name="memcachedump" />
-    <target name="getlist" />
-    <target name="remote" />
-    <target name="remotecmd" />
-    <target name="checkoutdevelop" />
-    <target name="checkoutmaster" />
-    <target name="pull" />
-    <target name="precache" />
-    <target name="postcache" />
-
 </project>
