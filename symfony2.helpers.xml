@@ -40,7 +40,7 @@
             description="Execute post deployment utilities on staging" />
 
     <target name="post_deploy.testing"
-        depends="staging.properties,
+        depends="testing.properties,
                  symfony.test.properties,
                  post_deploy" 
         description="Execute post deployment utilities on staging" />
