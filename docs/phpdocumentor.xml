@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="docs" description="documentation" default="do" >
 
-    <property name="build.target"        value=".build" />
+    <!-- set default documentor properties -->
+    <property name="docs.destdir"      value="${build.target}/docs" />
+    <property name="docs.target"       value="${project.basedir}" />
+    <property name="docs.ignore"       value="" />
+    <property name="docs.output"       value="HTML:frames:DOM/earthli" />
     
     <!-- ============================================ -->
     <!-- (DEFAULT) Target: info                       -->
@@ -25,11 +29,6 @@
     <!-- ============================================  -->
     <target name="do" >
 
-        <property name="docs.destdir"        value="${project.basedir}/${build.target}/docs" />
-        <property name="docs.appdir"         value="${project.basedir}/application" />
-        <property name="docs.library"        value="${project.basedir}/lib" />
-        <property name="docs.defaultpackage" value="${phing.project.name}" />
-
         <available file="${docs.destdir}" property="destexists" value="Yes"/>
 
         <!-- create a documents folder if it doesnt exist -->
@@ -50,13 +49,8 @@
                 defaultpackagename="${docs.defaultpackage}"
                 ignore="${docs.ignore}" >
 
-            <!-- sweeps the application directory for php files -->
-            <fileset dir="${docs.appdir}">
-                <include name="**/*.php" />
-            </fileset>
-
-            <!-- sweeps the specified library directory for php files -->
-            <fileset dir="${docs.library}">
+            <!-- sweeps a directory for php files -->
+            <fileset dir="${docs.target}">
                 <include name="**/*.php" />
             </fileset>
 

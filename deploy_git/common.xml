@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="deploycommon" description="common targets in deploy modules" default="remote" >
+    
+    <!-- deploy properties -->
+    <property name="deploy.branch"     value="master" />
+    
+    <!-- ============================================  -->
+    <!-- Target: currentbranch                         -->
+    <!-- ============================================  -->
+    <target name="currentbranch" >
+
+        <exec dir="${project.basedir}"
+              outputProperty="my.branch"
+              command="git branch -a | grep \* " />
+
+        <php function="str_replace" returnProperty="my.branch" >
+            <param value="* " />
+            <param value="" />
+            <param value="${my.branch}" />
+        </php>
+
+        <if>
+            <equals arg1="${my.branch}" arg2="&#40;no branch&#41;" />
+            <then>
+                <property override="true" name="deploy.branch" value="develop" />
+            </then>
+            <else>
+                <property override="true" name="deploy.branch" value="${my.branch}" />
+            </else>
+        </if>
+
+        <echo msg="current branch: ${deploy.branch}" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: remote                                -->
+    <!-- ============================================  -->
+    <target name="remote" >
+        <input propertyname="command">Enter command: </input>
+        <foreach list="${deploy.servers}" param="deploy.server" target="deploy.remotecmd" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: remotecmd                                -->
+    <!-- ============================================  -->
+    <target name="remotecmd" >
+        <echo msg="${deploy.user}&#64;${deploy.server}&#36; ${command}" />
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="echo ${deploy.password} | ${command}" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: verbose                               -->
+    <!-- ============================================  -->
+    <target name="verbose" >
+
+        <echo msg="\\== deploying with the following properties ==//" />
+        <echo msg="Project: ${phing.project.name}" />
+        <echo msg="repository: ${deploy.repository}" />
+        <echo msg="user: ${deploy.user}" />
+        <echo msg="password: ${deploy.password}" />
+        <echo msg="branch: ${deploy.branch}" />
+        <echo msg="deploy path: ${deploy.path}" />
+        <echo msg="deploy log: ${deploy.log}" />
+        <echo msg="servers: ${deploy.servers}" />
+
+    </target>
+    
+    <!-- ============================================ -->
+    <!-- Target: precache                             -->
+    <!-- ============================================ -->
+
+    <target name="precache" />
+    
+    <!-- ============================================ -->
+    <!-- Target: postcache                             -->
+    <!-- ============================================ -->
+
+    <target name="postcache" />
+    
+    <!-- ============================================  -->
+    <!-- Target: tunnel                                -->
+    <!-- ============================================  -->
+    <target name="tunnel" 
+            description="open an IPsec tunnel if one is configured" />
+
+        <property name="tunnel.result" value="Tunnel not configured" />
+        <if>
+            <equals arg1="${tunnel.configured}" arg2="1" />
+            <then>
+            
+                <echo msg="IPSec gateway ${tunnel.gateway}${line.separator}" 
+                      file="${tunnel.confpath}" />
+                
+                <echo msg="IPSec ID ${tunnel.id}${line.separator}" 
+                      file="${tunnel.confpath}" 
+                      append="true" />
+                
+                <echo msg="IPSec secret ${tunnel.secret}${line.separator}" 
+                      file="${tunnel.confpath}" 
+                      append="true" />
+                
+                <echo msg="Xauth username ${tunnel.username}${line.separator}" 
+                      file="${tunnel.confpath}" 
+                      append="true" />
+                
+                <echo msg="Xauth password ${tunnel.password}${line.separator}" 
+                      file="${tunnel.confpath}" 
+                      append="true" />
+                
+                <exec command="${tunnel.execline}" 
+                      outputProperty="tunnel.result" />
+                
+                <delete file="${tunnel.confpath}" />
+                
+            </then>
+        </if>
+        
+        <echo msg="${tunnel.result}" />
+        
+   </target>
+
+</project>

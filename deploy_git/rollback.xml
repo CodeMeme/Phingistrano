@@ -2,9 +2,8 @@
 <project name="rollback" description="utilities for rolling back  deployments" default="info" >
 
     <property name="rollback.direction" value="reverse"/>
-    <property name="rollback.depth" value="1" />
-    <property name="rollback.selected" value="false" />
-    <property name="build.target"        value=".build" />
+    <property name="rollback.depth"     value="1" />
+    <property name="rollback.selected"  value="false" />
 
     <!-- ============================================ -->
     <!-- (DEFAULT) Target: info                       -->
@@ -205,22 +204,6 @@
              command="echo ${deploy.password} | 
                       sudo -S /etc/init.d/memcached restart" />
                       
-    </target>
-
-    <!-- ============================================  -->
-    <!-- Target: verbose                               -->
-    <!-- ============================================  -->
-    <target name="verbose" >
-    
-        <echo msg="\\== Rolling back with the following properties ==//" />
-        <echo msg="Project: ${phing.project.name}" />
-        <echo msg="repository: ${deploy.repository}" />
-        <echo msg="user: ${deploy.user}" />
-        <echo msg="password: ${deploy.password}" />
-        <echo msg="branch: ${deploy.branch}" />
-        <echo msg="deploy path: ${deploy.path}" />
-        <echo msg="webservers: ${deploy.servers}" />
-        
     </target>
 
 </project>

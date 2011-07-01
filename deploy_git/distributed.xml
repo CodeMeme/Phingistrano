@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="deploy" description="utilities for deploying projects with the distributed strategy" default="do" >
+    <!-- import common tasks -->
+    <php function="dirname" returnProperty="deploy.basedir">
+        <param value="${phing.file.deploy}"/>
+    </php>
+    <import file="${deploy.basedir}/common.xml" />
+    <import file="${deploy.basedir}/rollback.xml" />
+
+    <!-- deploy properties -->
+    <property name="deploy.cacheexists"  value="false" override="true" />
+
+    <!-- ============================================  -->
+    <!-- Target: do                                    -->
+    <!-- ============================================  -->
+    <target name="do" >
+        <echo msg="executing distributed deployment ... " />
+        <echo msg="============================ " />
+        <phingcall target="deploy.distributed" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: distributed                           -->
+    <!-- ============================================  -->
+
+    <target name="distributed" depends="deploy.prepare.distributed" >
+
+        <!-- fetch origin -->
+        <exec dir="${project.basedir}/${build.target}/cached-copy"
+              outputProperty="fetchresult"
+              command="git fetch origin" />
+
+        <!-- resolve revision hash -->
+        <exec dir="${project.basedir}/${build.target}/cached-copy"
+              outputProperty="deploy.revision"
+              command="git rev-parse origin/${deploy.branch}" />
+
+        <echo msg="resolved revision of ${deploy.branch} as: ${deploy.revision}" />
+
+        <!-- checkout revision -->
+        <exec dir="${project.basedir}/${build.target}/cached-copy"
+              outputProperty="resetresult"
+              command="git checkout -f ${deploy.revision}" />
+
+        <echo msg="${resetresult}" />
+
+        <php function="strrpos" returnProperty="pass">
+            <param value="${checkoutresult}" />
+            <param value="error" />
+        </php>
+
+        <exec outputProperty="submodulesyncresult"
+              dir="${project.basedir}/${build.target}/cached-copy"
+              command="for mod in `git submodule status | awk '{ print $2 }'`; do
+                        git config -f .git/config submodule.&#36;{mod}.url
+                        `git config -f .gitmodules --get submodule.&#36;{mod}.url`;
+                       done;" />
+
+
+        <!-- Update Submodules -->
+        <exec outputProperty="submoduleupdateresult"
+              dir="${project.basedir}/${build.target}/cached-copy"
+              command="git submodule update" />
+
+       <!-- Post-Cache Hook -->
+       <phingcall target="postcache" />
+
+        <exec command="cp -R ${project.basedir}/${build.target}/cached-copy
+                       ${project.basedir}/${build.target}/tmp" />
+        
+        <!-- strip git overhead -->
+	    <exec dir="${project.basedir}/${build.target}/tmp"
+	          command="for i in `find . -name .git` ; do
+	                    rm -rf $i;
+	                   done"  />
+
+        <!-- create tarball with downloaded repository -->
+        <php function="date" returnProperty="deploy.ts" >
+            <param value="YmdHis" />
+        </php>
+
+        <property name="deploy.tarball" override="true"
+                  value="${deploy.ts}.${deploy.branch}.tar.gz" />
+
+        <php function="str_replace" returnProperty="deploy.tarball" >
+            <param value="/" />
+            <param value="-" />
+            <param value="${deploy.tarball}" />
+        </php>
+
+        <tar destfile="${project.basedir}/${build.target}/tarballs/${deploy.tarball}"
+             basedir="${project.basedir}/${build.target}/tmp"
+             compression="gzip" />
+
+        <delete dir="${project.basedir}/${build.target}/tmp"
+                includeemptydirs="true"
+                verbose="false"
+                failonerror="false" />
+
+    <!-- echo info about the package -->
+	<filesize file="${project.basedir}/${build.target}/tarballs/${deploy.tarball}" />
+        <php expression="floor(${filesize}/1024)" returnProperty="ksize" />
+        <php expression="floor(${filesize}/1024/1024)" returnProperty="msize" />
+        <echo msg="Filesize is: ${ksize} Kb"/>
+        <echo msg="Filesize is: ${msize} Mb"/>
+
+        <!-- transfer the file via scp -->
+        <foreach list="${deploy.servers}" param="deploy.server" target="deploy.deliver" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: prepare.distributed                   -->
+    <!-- ============================================  -->
+    <target name="prepare.distributed" >
+
+        <available file="${project.basedir}/${build.target}/cached-copy"
+                   property="deploy.cacheexists"
+                   value="true"/>
+
+        <if>
+            <isfalse value="${deploy.cacheexists}"/>
+            <then>
+                <!-- create required directories -->
+                <mkdir dir="${project.basedir}/${build.target}" />
+                <mkdir dir="${project.basedir}/${build.target}/tarballs" />
+                <mkdir dir="${project.basedir}/${build.target}/logs/deploy" />
+
+                <!-- clone repository -->
+                <exec outputProperty="cloneresult"
+                      command="git clone -q --depth 1 ${deploy.repository}
+                               ${project.basedir}/${build.target}/cached-copy" />
+
+                <echo msg="${cloneresult}" />
+
+                <!-- Init Submodules -->
+                <exec outputProperty="submoduleinitresult"
+                      dir="${project.basedir}/${build.target}/cached-copy"
+                      command="git submodule init" />
+
+                <echo msg="${submoduleinitresult}"/>
+            </then>
+        </if>
+        
+        <!-- Pre-Cache Hook -->
+        <phingcall target="precache" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: prepare.direct                        -->
+    <!-- ============================================  -->
+    <target name="prepare.direct" >
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="if [ ! -d ${deploy.path}/${build.target}/cached-copy ]; then
+                        git clone -q --depth 1 ${deploy.repository}
+                        ${deploy.path}/${build.target}/cached-copy ${deploy.log};
+                        (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                        git submodule init) ${deploy.log};
+                      fi; " />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="mkdir -p ${deploy.path}/${build.target}/tarballs ${deploy.log};" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="mkdir -p ${deploy.path}/${build.target}/logs/deploy ${deploy.log};" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="mkdir -p ${deploy.path}/releases  ${deploy.log};" />
+             
+        <!-- Pre-Cache Hook -->
+        <phingcall target="precache" />
+
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: deliver                               -->
+    <!-- ============================================  -->
+    <target name="deliver" depends="deploy.upload" >
+
+        <!-- create target directory -->
+        <echo msg="creating directory: ${deploy.path}/releases/${deploy.ts}" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="mkdir -p ${deploy.path}/releases/${deploy.ts}" />
+
+        <!-- unpack tarball -->
+        <echo msg="unpacking: ${project.basedir}/tarballs/${deploy.tarball}
+                   to remote location: ${deploy.server}:
+                   ${deploy.path}/releases/${deploy.ts}" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="tar -xvf ${deploy.path}/${deploy.tarball} --directory=${deploy.path}/releases/${deploy.ts}" />
+
+        <!-- delete tarball -->
+        <echo msg="deleting tarball: ${deploy.path}/${deploy.tarball}" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="rm ${deploy.path}/${deploy.tarball}" />
+
+        <!-- link it -->
+        <echo msg="deleting symlink: ${deploy.path}/current" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="rm ${deploy.path}/current" />
+
+        <echo msg="creating new symlink: ${deploy.path}/current" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="ln -s ${deploy.path}/releases/${deploy.ts}
+                      ${deploy.path}/current" />
+
+        <!-- revision tag -->
+        <echo msg="placing hash in REVISION: ${deploy.revision}" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="echo ${deploy.revision} > ${deploy.path}/current/REVISION" />
+
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: upload                                -->
+    <!-- ============================================  -->
+    <target name="upload" >
+
+        <echo msg="uploading: ${project.basedir}/${build.target}/tarballs/${deploy.tarball}" />
+
+        <echo msg="to server: ${deploy.server}" />
+
+        <scp username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             todir="${deploy.path}"
+             file="${project.basedir}/${build.target}/tarballs/${deploy.tarball}" />
+
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: clean                                 -->
+    <!-- ============================================  -->
+    <target name="clean" >
+        <delete dir="${project.basedir}/${build.target}/cached-copy" />
+    </target>
+
+</project>

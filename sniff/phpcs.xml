@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="sniff" description="Maximum Sniffage detected" default="do" >
+
+    <!-- set default code sniff properties -->
+    <property name="sniff.standard"         value="PEAR" />
+    <property name="sniff.ignorepatterns"   value="${build.target},vendor,Sniff.php" />
+    <property name="sniff.show"             value="true" />
+
+    <!-- ============================================  -->
+    <!-- Target: do                                   -->
+    <!-- ============================================  -->
+    <target name="do" >
+        <phpcodesniffer standard="${sniff.standard}"
+                file="${project.basedir}"
+                ignorePatterns="${sniff.ignorepatterns}"
+                allowedFileExtensions="php"
+                showSniffs="${sniff.show}" >
+                
+             <!-- prints output to the screen -->
+            <formatter type="default" 
+                       usefile="false" />
+            <!-- prints output to a file in checkstyle standard -->
+            <formatter type="checkstyle" 
+                       outfile="${project.basedir}/${build.target}/checkstyle.xml" />
+                       
+        </phpcodesniffer>
+    </target>
+
+</project>

@@ -4,7 +4,7 @@
     <!-- ============================================= -->
     <!-- Target: tunnel                                -->
     <!-- ============================================= -->
-    <target name="tunnel"   depends="tunnel.phingistrano.conf,tunnel.open" />
+    <target name="tunnel"   depends="tunnel.phingistrano.conf,deploy.tunnel" />
 
     <target name="tunnel.phingistrano.conf" >
         <property name="tunnel.gateway"     value="204.99.99.99" />

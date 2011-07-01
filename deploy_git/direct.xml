@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="deploy" description="utilities for deploying projects with a direct strategy" default="do" >
+    <!-- import common tasks -->
+    <php function="dirname" returnProperty="deploy.basedir">
+        <param value="${phing.file.deploy}"/>
+    </php>
+    <import file="${deploy.basedir}/common.xml" />
+    <import file="${deploy.basedir}/rollback.xml" />
+
+    <!-- deploy properties -->
+    <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
+    
+    <!-- ============================================  -->
+    <!-- Target: do                                    -->
+    <!-- ============================================  -->
+    <target name="do" >
+        <echo msg="executing direct deployment ... " />
+        <echo msg="============================ " />
+        <foreach list="${deploy.servers}"
+                 param="deploy.server"
+                 target="deploy.direct" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: direct                                -->
+    <!-- ============================================  -->
+    <target name="direct" depends="deploy.convert">
+
+        <!-- link it up -->
+         <ssh username="${deploy.user}"
+              password="${deploy.password}"
+              host="${deploy.server}"
+              command="rm ${deploy.path}/current ${deploy.log};
+                       ln -s ${deploy.path}/releases/${deploy.ts}
+                       ${deploy.path}/current ${deploy.log}; " />
+
+         <!-- deposit the deploy log in the log folder -->
+         <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="cp ${deploy.path}/deploy.log
+                      ${deploy.path}/${build.target}/logs/deploy/${deploy.ts}.deploy.log;
+                      cp ${deploy.path}/deploy.log
+                      ${deploy.path}/releases/${deploy.ts}/log/${deploy.ts}.deploy.log;
+                      rm ${deploy.path}/deploy.log; " />
+
+    </target >
+
+    <!-- ============================================  -->
+    <!-- Target: prepare.direct                        -->
+    <!-- ============================================  -->
+    <target name="prepare.direct" >
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="if [ ! -d ${deploy.path}/${build.target}/cached-copy ]; then
+                        git clone -q --depth 1 ${deploy.repository}
+                        ${deploy.path}/${build.target}/cached-copy ${deploy.log};
+                        (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                        git submodule init) ${deploy.log};
+                      fi; " />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="mkdir -p ${deploy.path}/${build.target}/tarballs ${deploy.log};" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="mkdir -p ${deploy.path}/${build.target}/logs/deploy ${deploy.log};" />
+
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="mkdir -p ${deploy.path}/releases  ${deploy.log};" />
+             
+        <!-- Pre-Cache Hook -->
+        <phingcall target="precache" />
+
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: convert                               -->
+    <!-- ============================================  -->
+    <target name="convert" depends="deploy.prepare.direct" >
+
+         <!-- set up unique name and tarball name -->
+         <php function="date" returnProperty="deploy.ts" >
+            <param value="YmdHis" />
+        </php>
+
+        <property name="deploy.tarball"  override="true"
+                  value="${deploy.ts}.${deploy.branch}.tar.gz"  />
+
+        <php function="str_replace" returnProperty="deploy.tarball" >
+            <param value="/" />
+            <param value="-" />
+            <param value="${deploy.tarball}" />
+        </php>
+
+        <!-- update the repository and reset it to the current revision -->
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                      git fetch origin) ${deploy.log};
+                      echo Found current branch is ${deploy.branch} ${deploy.log};
+                      (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                      REV=$(git rev-parse origin/${deploy.branch}) &amp;&amp;
+                      echo Found revision is $REV &amp;&amp;
+                      cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                      git checkout -f $REV) ${deploy.log}; " />
+
+        <!-- reset submodules to their appropriate revisions -->
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="for mod in `(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                      git submodule status | awk '{ print $2 }')`; do
+                        (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                        git config -f .git/config submodule.&#36;{mod}.url
+                        `git config -f .gitmodules --get submodule.&#36;{mod}.url`)
+                        ${deploy.log};
+                      done;" />
+
+        <!-- update submodules -->
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                       git submodule update) ${deploy.log}; " />
+                       
+        <!-- Post-Cache Hook -->
+        <phingcall target="postcache" />
+
+        <!-- make deployment directory and tarball archive -->
+        <ssh username="${deploy.user}"
+             password="${deploy.password}"
+             host="${deploy.server}"
+             command="mkdir ${deploy.path}/releases/${deploy.ts} ${deploy.log};
+                      cp -R ${deploy.path}/${build.target}/cached-copy/*
+                      ${deploy.path}/releases/${deploy.ts} ${deploy.log};
+                      for i in `find ${deploy.path}/releases/${deploy.ts} -name .git` ; do
+                        rm -rf $i ${deploy.log};
+                      done;
+                      rm -rf ${deploy.path}/releases/${deploy.ts}/${build.target} ${deploy.log};
+                      (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                      REV=$(git rev-parse origin/${deploy.branch}) &amp;&amp;
+                      echo $REV > ${deploy.path}/releases/${deploy.ts}/REVISION);
+                      tar czf ${deploy.path}/${build.target}/tarballs/${deploy.tarball}
+                      ${deploy.path}/releases/${deploy.ts} ${deploy.log};"/>
+
+        <!-- print filesize info -->
+        <ssh username="${deploy.user}"
+              password="${deploy.password}"
+              host="${deploy.server}"
+              command="echo File size ${deploy.log};
+                       echo ============== ${deploy.log};
+                       B=$(stat -c %s ${deploy.path}/${build.target}/tarballs/${deploy.tarball});
+                       KB=$(($B / 1024));
+                       echo $KB Kb ${deploy.log};
+                       MB=$(($KB / 1024));
+                       echo $MB Mb ${deploy.log};" />
+    </target>
+
+</project>
