@@ -1,45 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Symfony2" default="help">
-    
+
+    <!-- Required properties -->
+    <property name="symfony.env" value="prod" />
+
+    <!-- Targets that assign properties -->
+    <target name="symfony.stage.properties" >
+        <property name="symfony.env" value="stage" override="true" />
+    </target>
+
+    <target name="symfony.test.properties" >
+        <property name="symfony.env" value="test" override="true" />
+    </target>
+
     <!-- postcache -->
     <target name="postcache"
+        depends="refresh_vendors"
+        description="postcache deploy hook" />
+
+    <!-- refresh vendors -->
+    <target name="refresh_vendors"
         description="Refreshes the vendors" >
-        <exec dir="${project.basedir}/${build.target}/cached-copy/app/config" 
-            passthru="true" 
-            command="cp database_dev.yml.dist database_dev.yml" />
         <exec dir="${project.basedir}/${build.target}/cached-copy"
               passthru="true"
               command="rm -rf vendor/ &amp;&amp; bin/vendors install" />
     </target>
-    
+
     <!-- postdeploy targets -->
-    
     <target name="post_deploy"
             depends="migrate, 
                      assetic_dump, 
                      clear_cache" 
             description="Execute post deployment utilities on production" />
-            
+
     <target name="post_deploy.staging"
-            depends="staging.properties, 
+            depends="staging.properties,
+                     symfony.stage.properties,
                      post_deploy" 
             description="Execute post deployment utilities on staging" />
-    
+
+    <target name="post_deploy.testing"
+        depends="staging.properties,
+                 symfony.test.properties,
+                 post_deploy" 
+        description="Execute post deployment utilities on staging" />
+
     <!-- doctrine:migrations:migrate -->
-    
     <target name="migrate"
             description="Run migrations on production servers" >
             <property name="command" 
                 value="(
                 cd ${deploy.path}/current/app &amp;&amp; 
-                ./console --no-ansi --env=prod doctrine:migrations:migrate  
+                ./console --no-ansi --env=${symfony.env} doctrine:migrations:migrate  
                 )"
                 override="true" />
             <foreach  list="${deploy.servers}" 
                 param="deploy.server" 
                 target="deploy.remotecmd" />
     </target>
-    
+
     <!-- assets:install -->
     <!-- assetic:dump -->
     <target name="assetic_dump"
@@ -47,15 +66,15 @@
             <property name="command" 
                 value="( 
                 cd ${deploy.path}/current/app &amp;&amp; 
-                ./console --no-ansi --env=prod --symlink assets:install ../web &amp;&amp;
-                ./console --no-ansi --env=prod assetic:dump  
+                ./console --no-ansi --env=${symfony.env} --symlink assets:install ../web &amp;&amp;
+                ./console --no-ansi --env=${symfony.env} assetic:dump  
                 )" 
                 override="true" />
             <foreach list="${deploy.servers}" 
                 param="deploy.server" 
                 target="deploy.remotecmd" />
     </target>
-    
+
     <!-- cache:clear -->
     <!-- cache:warmup -->
     <!-- fix cache permissions assumes that the webserver is in the same group as the owner -->

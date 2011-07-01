@@ -2,8 +2,8 @@
 A PHP utility for building and deploying projects based on Phing and other paralell technology.
 
 ## NEW! Symfony2 Helpers ##
-Ive added an example of a helpers file that you could use to help manage a symfony2 deployment.
-[Check it out](https://github.com/CodeMeme/Phingistrano/blob/develop/symfony2.helpers.xml)
+Ive added an example of a helpers file that you could use to help manage a symfony2 deployment.  
+[Check it out](https://github.com/CodeMeme/Phingistrano/blob/develop/symfony2.helpers.xml)  
 [README][symfony2]
 
 ## Table of Contents ##
@@ -713,18 +713,122 @@ Symfony2 is a great new php framework but during deployment, some complexity is 
             
 ### inside the symfony2.helpers.xml ###
 
-####postcache####
-The symfony2 helpers file takes advantage of the new postcache hook in Phingistrano, this makes sure that your Symfony2 app gets a fresh install of all it's dependencies before it gets tarballed and distributed to the deployment servers. 
+#### Assigning symfony properties ####
+You will need to assign a property of the symfony environment. You may even need to assign other properties depending on what you're doing. This should help you along in the process.
+
+    <!-- Required properties -->
+    <property name="symfony.env" value="prod" />
+
+    <!-- Targets that assign properties -->
+    <target name="symfony.stage.properties" >
+        <property name="symfony.env" value="stage" override="true" />
+    </target>
+
+    <target name="symfony.test.properties" >
+        <property name="symfony.env" value="test" override="true" />
+    </target>
+    
+##### Asserting properties for the right environment #####
+Now when you need to augment the targets to perform the right environmental context, you just add the symfony.properties.stage, symfony.properties.test target to the depends attribute. This is exactly how Phingistrano does it in the main build paradigm.
+
+#### postcache ####
+The symfony2 helpers file takes advantage of the new postcache hook in Phingistrano. "postcache" is used immediately after the deploy module creates it's "cached-copy". Running these targets in "postcache" ensures that you will have refreshed versions of your vendors folder once it creates the tarball for distribution.
 
     <!-- postcache -->
     <target name="postcache"
+        depends="refresh_vendors"
+        description="postcache deploy hook" />
+
+    <!-- refresh vendors -->
+    <target name="refresh_vendors"
         description="Refreshes the vendors" >
-        <exec dir="${project.basedir}/${build.target}/cached-copy/app/config" 
-            passthru="true" 
-            command="cp database_dev.yml.dist database_dev.yml" />
         <exec dir="${project.basedir}/${build.target}/cached-copy"
               passthru="true"
               command="rm -rf vendor/ &amp;&amp; bin/vendors install" />
+    </target>
+
+#### postdeploy ####
+These are targets that will be run immediately after your deployment on all the servers defined for this environment. The best way to manage this "postdeploy" sequence is to aggregate all of your targets into the "depends" attribute.
+
+In this example I've created postdeploy targets for each additional environment context. This ensures that your properties get assigned based on what environment you're deploying to.
+
+    <!-- postdeploy targets -->
+    <target name="post_deploy"
+            depends="migrate, 
+                     assetic_dump, 
+                     clear_cache" 
+            description="Execute post deployment utilities on production" />
+
+    <target name="post_deploy.staging"
+            depends="staging.properties,
+                     symfony.stage.properties,
+                     post_deploy" 
+            description="Execute post deployment utilities on staging" />
+
+    <target name="post_deploy.testing"
+        depends="staging.properties,
+                 symfony.test.properties,
+                 post_deploy" 
+        description="Execute post deployment utilities on testing" />
+
+#### migrate ####
+
+This performs doctrine migrations on your application
+
+    <!-- doctrine:migrations:migrate -->
+    <target name="migrate"
+            description="Run migrations on production servers" >
+            <property name="command" 
+                value="(
+                cd ${deploy.path}/current/app &amp;&amp; 
+                ./console --no-ansi --env=${symfony.env} doctrine:migrations:migrate  
+                )"
+                override="true" />
+            <foreach  list="${deploy.servers}" 
+                param="deploy.server" 
+                target="deploy.remotecmd" />
+    </target>
+    
+#### assetic_dump ####
+
+This installs assets and performs an assetic dump. Bear in mind that symlinked assets in your tarball will have incorrect paths on your deployment server unless you install the assets on post deployment. This is because symfony uses only absolute paths in the asset install and has no option for relative paths.
+
+    <!-- assets:install -->
+    <!-- assetic:dump -->
+    <target name="assetic_dump"
+            description="Warm assets on production servers" >
+            <property name="command" 
+                value="( 
+                cd ${deploy.path}/current/app &amp;&amp; 
+                ./console --no-ansi --env=${symfony.env} --symlink assets:install ../web &amp;&amp;
+                ./console --no-ansi --env=${symfony.env} assetic:dump  
+                )" 
+                override="true" />
+            <foreach list="${deploy.servers}" 
+                param="deploy.server" 
+                target="deploy.remotecmd" />
+    </target>
+
+#### clear_cache ####
+
+This clears the cache, warms up the cache, and performs a cruicial directory permissions adjustment so that the webserver can read/write to your cache. This example assumes that the webserver user is in the same group as your directory owner/deployment user. Individual milage may vary depending on how your hosting environment is set up.
+
+    <!-- cache:clear -->
+    <!-- cache:warmup -->
+    <!-- fix cache permissions assumes that the webserver is in the same group as the owner -->
+    <target name="clear_cache"
+            description="dump and warm cache on production servers" >
+            <property name="command" 
+                value="(
+                cd ${deploy.path}/current/app &amp;&amp; 
+                ./console cache:clear --no-warmup &amp;&amp; 
+                ./console cache:warmup --no-ansi &amp;&amp; 
+                chmod -R 770 cache/
+                )" 
+                override="true" />
+            <foreach list="${deploy.servers}" 
+                     param="deploy.server" 
+                     target="deploy.remotecmd" />
     </target>
 
 
