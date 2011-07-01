@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Symfony2" default="help">
+    
+    <!-- postcache -->
+    <target name="postcache"
+        description="Refreshes the vendors" >
+        <exec dir="${project.basedir}/${build.target}/cached-copy/app/config" 
+            passthru="true" 
+            command="cp database_dev.yml.dist database_dev.yml" />
+        <exec dir="${project.basedir}/${build.target}/cached-copy"
+              passthru="true"
+              command="rm -rf vendor/ &amp;&amp; bin/vendors install" />
+    </target>
+    
+    <!-- postdeploy targets -->
+    
+    <target name="post_deploy"
+            depends="migrate, 
+                     assetic_dump, 
+                     clear_cache" 
+            description="Execute post deployment utilities on production" />
+            
+    <target name="post_deploy.staging"
+            depends="staging.properties, 
+                     post_deploy" 
+            description="Execute post deployment utilities on staging" />
+    
+    <!-- doctrine:migrations:migrate -->
+    
+    <target name="migrate"
+            description="Run migrations on production servers" >
+            <property name="command" 
+                value="(
+                cd ${deploy.path}/current/app &amp;&amp; 
+                ./console --no-ansi --env=prod doctrine:migrations:migrate  
+                )"
+                override="true" />
+            <foreach  list="${deploy.servers}" 
+                param="deploy.server" 
+                target="deploy.remotecmd" />
+    </target>
+    
+    <!-- assets:install -->
+    <!-- assetic:dump -->
+    <target name="assetic_dump"
+            description="Warm assets on production servers" >
+            <property name="command" 
+                value="( 
+                cd ${deploy.path}/current/app &amp;&amp; 
+                ./console --no-ansi --env=prod --symlink assets:install ../web &amp;&amp;
+                ./console --no-ansi --env=prod assetic:dump  
+                )" 
+                override="true" />
+            <foreach list="${deploy.servers}" 
+                param="deploy.server" 
+                target="deploy.remotecmd" />
+    </target>
+    
+    <!-- cache:clear -->
+    <!-- cache:warmup -->
+    <!-- fix cache permissions assumes that the webserver is in the same group as the owner -->
+    <target name="clear_cache"
+            description="dump and warm cache on production servers" >
+            <property name="command" 
+                value="(
+                cd ${deploy.path}/current/app &amp;&amp; 
+                ./console cache:clear --no-warmup &amp;&amp; 
+                ./console cache:warmup --no-ansi &amp;&amp; 
+                chmod -R 770 cache/
+                )" 
+                override="true" />
+            <foreach list="${deploy.servers}" 
+                     param="deploy.server" 
+                     target="deploy.remotecmd" />
+    </target>
+
+</project>

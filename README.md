@@ -1,12 +1,18 @@
 # Phingistrano ![project status](http://stillmaintained.com/CodeMeme/Phingistrano.png) #
 A PHP utility for building and deploying projects based on Phing and other paralell technology.
 
+## NEW! Symfony2 Helpers ##
+Ive added an example of a helpers file that you could use to help manage a symfony2 deployment.
+[Check it out](https://github.com/CodeMeme/Phingistrano/blob/develop/symfony2.helpers.xml)
+[README][symfony2]
+
 ## Table of Contents ##
 * [Overview][overview]
 * [Command line usage][commandline]
 * [Installing Phing and dependencies][dependencies]
 * [Adding Phingistrano to a project as a git submodule][submodule]
 * [Creating a build file][build]
+* [Symfony2 Helpers][symfony2]
 * [The Modules][modules] 
     + [Deploy][deploy]
     + [Rollback][rollback]
@@ -181,8 +187,8 @@ add it like this (vendor/Phingistrano is the path of how I set up my submodule):
     <project name="myproject" default="help">
 
     <!-- Imports -->
-    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
     <import file="${project.basedir}/build.helpers.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
 
     </project>
     
@@ -237,8 +243,8 @@ For my example, I will show you how you should add the properties to your build 
     <project name="Phingistrano" default="help">
 
     <!-- Imports -->
-    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
     <import file="${project.basedir}/build.helpers.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
 
     <!-- Required properties -->
     <property name="build.target"      value=".build" />
@@ -275,8 +281,8 @@ that you enter on the command line when you use phing. i.e : $phing [ target ]
     <project name="Phingistrano" default="help">
 
     <!-- Imports -->
-    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
     <import file="${project.basedir}/build.helpers.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
 
     <!-- Required properties -->
     <property name="build.target"      value=".build" />
@@ -373,8 +379,8 @@ as a dependency:
     <project name="Phingistrano" default="help">
 
     <!-- Imports -->
-    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
     <import file="${project.basedir}/build.helpers.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
 
     <!-- Required properties -->
     <property name="build.target"      value=".build" />
@@ -677,6 +683,49 @@ This should be a path to a library folder that you may want the documentor to ma
 This should be a path to your application directory
 
     <property name="docs.appdir"       value="${project.basedir}/app" />
+    
+<a name="symfony2" />
+
+[symfony2]: #symfony2
+## Symfony2 Helpers ##
+
+Symfony2 is a great new php framework but during deployment, some complexity is added to make sure your application gets its needed dependencies and that the application is conditioned for perfect operation. Things like assetic, doctrine migrations, and caching may need some help. I've prepared this example file of how you can do the  conditioning to your symfony 2 app during automated deployment.
+
+### Add the Symfony2 helpers file to your main buld.xml by importing it just like a regular helpers file ###
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <project name="myproject" default="help">
+
+    <!-- Imports -->
+    <import file="${project.basedir}/build.helpers.xml" />
+    <import file="${project.basedir}/symfony2.helpers.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
+
+### add the post_deploy routine to your deployment targets ###
+
+    <target name="deploy.production"
+            depends="deploy.do, post_deploy"
+            description="Deploys master branch to production." />
+
+    <target name="deploy.staging"
+            depends="staging.properties, deploy.do, post_deploy.staging"
+            description="Deploys the current branch to staging." />
+            
+### inside the symfony2.helpers.xml ###
+
+####postcache####
+The symfony2 helpers file takes advantage of the new postcache hook in Phingistrano, this makes sure that your Symfony2 app gets a fresh install of all it's dependencies before it gets tarballed and distributed to the deployment servers. 
+
+    <!-- postcache -->
+    <target name="postcache"
+        description="Refreshes the vendors" >
+        <exec dir="${project.basedir}/${build.target}/cached-copy/app/config" 
+            passthru="true" 
+            command="cp database_dev.yml.dist database_dev.yml" />
+        <exec dir="${project.basedir}/${build.target}/cached-copy"
+              passthru="true"
+              command="rm -rf vendor/ &amp;&amp; bin/vendors install" />
+    </target>
 
 
 <a name="gotchas" />
@@ -686,13 +735,12 @@ This should be a path to your application directory
   
 ### namespaced submodules won't work if a base target doesn't exist ###
 
-I percieve this as a problem with phing. If you refer to an Imported target (namespaced target i.e.  namespaced.mytarget) in "depends", in the `<phing />` task or even from the command line, if mytarget doesn't exist, then  mytarget from the imported module fills it in, and won't be availalbe at namespaced.mytarget. It's a confusing problem but suffice it to say that the easiest way to work around this is to createempty targets for submodule targets. 
-
-due to this percieved problem, you have to have an empty target in your main build file that corresponds to your submodule target. This can be as simple as creating a target with the appropriate name:
+With phing version 2.4, you have to have an empty target in your main build file that corresponds to your submodule target. This can be as simple as creating a target with the appropriate name:
 
     <target name="mytarget" />  
 
-A ticket/CR has been submitted to phing.tigris to have this fixed. The ticket # is 620.
+The ticket #620 has been completed by Matthias from Phing development and starting on Phing version 2.5 these empty targets will not be necessary.
+
 
 <a name="about" />
 
