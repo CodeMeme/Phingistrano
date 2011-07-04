@@ -329,9 +329,9 @@ class SshTask extends Task {
 
         $output = $this->connection->exec($this->command);
         if (!$output) {
-            throw new BuildException("Could not execute command!");
+            $output = "";
         }
-        
+      
         $this->log("Executing command {$this->command}", Project::MSG_VERBOSE);
         $this->log("Result: {$output}", Project::MSG_VERBOSE);
         
