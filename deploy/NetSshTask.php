@@ -27,7 +27,7 @@ require_once 'phing/Task.php';
  * @author    Jesse Greathouse <jesse.greathouse@gmail.com>
  * @package   phing.tasks.ext
  */
-class SshTask extends Task {
+class NetSshTask extends Task {
 
     private $host = "";
     private $port = 22;

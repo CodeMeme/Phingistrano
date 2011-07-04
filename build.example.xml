@@ -1,33 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Phingistrano" default="help">
 
-    <!-- Imports -->
-    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
-    <import file="${project.basedir}/build.helpers.xml" />
-
     <!-- Required properties -->
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
     <property name="build.target"      value=".build" />
-    <property name="deploy.strategy"   value="distributed" />
-    <property name="deploy.remote"     value="172.99.99.91" />
-    <property name="deploy.remotedir"  value="~/${phing.project.name}" />
-    <property name="deploy.execline"   value="deploy.production" />
-    <property name="deploy.branch"     value="master" />
     <property name="deploy.user"       value="jesse" />
     <property name="deploy.password"   value="jiveturkey" />
-    <property name="deploy.path"       value="/var/www/deployments/schools/${deploy.branch}" />
+    <property name="deploy.path"       value="/var/www/deployments/${phing.project.name}/${deploy.branch}" />
     <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
-    <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
-    <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
-    <property name="test.dir"          value="${project.basedir}/src" />
-    <property name="test.incpattern"   value="**/*Test.php" />
-    <property name="test.excpattern"   value="" />
     <property name="version.to"        value="jesse@codememe.com" />
     <property name="version.from"      value="robot@codememe.com" />
-    <property name="sniff.standard"    value="PEAR" />
-    <property name="docs.destdir"      value="${project.basedir}/build/docs" />
-    <property name="docs.appdir"       value="${project.basedir}/app" />
-    <property name="docs.library"      value="${project.basedir}/src" />    
+    
+    <!-- available properties (not required) -->
+        <!-- deploy common -->
+        <property name="deploy.branch"      value="master" />
+        <property name="tunnel.configured"  value="false" />
+
+        <!-- deploy direct -->
+        <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
+        
+        <!-- test phpunit -->
+        <property name="test.bootstrap"    value="${build.target}/tests/bootstrap.php" />
+        <property name="test.dir"          value="${project.basedir}" />
+        <property name="test.incpattern"   value="**/*Test.php" />
+        <property name="test.excpattern"   value="" />
+        <property name="test.type"         value="xml" />
+        <property name="test.usefile"      value="true" />
+        <property name="test.haltfail"     value="true" />
+        <property name="test.halterror"    value="true" />
+        
+        <!-- sniff phpcs -->
+        <property name="sniff.standard"         value="PEAR" />
+        <property name="sniff.ignorepatterns"   value="${build.target},vendor,Sniff.php" />
+        <property name="sniff.show"             value="true" />
+        
+        <!-- docs phpdocumentor -->
+        <property name="docs.destdir"       value="${build.target}/docs" />
+        <property name="docs.target"        value="${project.basedir}" />
+        <property name="docs.ignore"        value="" />
+        <property name="docs.output"        value="HTML:frames:DOM/earthli" />
+    
+    <!-- Imports -->
+    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
+    <import file="${project.basedir}/build.helpers.xml" /> 
 
     <!-- Main Targets -->
     <target name="help"

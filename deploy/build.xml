@@ -1,33 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="deploy" description="utilities for deploying projects" default="do" >
 
-    <!-- global deploy properties -->
+    <!-- deploy properties -->
+    <property name="deploy.branch"       value="master" />
     <property name="deploy.cacheexists"  value="false" override="true" />
-    <property name="build.target"        value=".build" />
-
-    <!-- ============================================ -->
-    <!-- (DEFAULT) Target: info                       -->
-    <!-- ============================================ -->
-
-    <target name="info" >
-
-        <php function="dirname" returnProperty="deploy.basedir" >
-            <param value="${phing.file.deploy}" />
-        </php>
-
-        <exec dir="${deploy.basedir}"
-              outputProperty="targets"
-              command="phing -list -quiet" />
-
-        <echo msg="${targets}" />
-
-    </target>
+    <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
+    <property name="deploy.sshlib"       value="" />
     
     <!-- ============================================  -->
     <!-- Custom Taskdefs                               -->
     <!-- ============================================  -->
-    <taskdef classpath="${deploy.basedir}/" classname="SshTask"   name="ssh" />
-    <taskdef classpath="${deploy.basedir}/" classname="ScpTask"   name="scp" />
+    <taskdef classpath="${phingistrano.dir}" classname="deploy.NetSshTask"   name="netssh" />
+    <taskdef classpath="${phingistrano.dir}" classname="deploy.NetScpTask"   name="netscp" />
 
     <!-- ============================================  -->
     <!-- Target: do                                    -->
@@ -48,18 +32,6 @@
                 <foreach list="${deploy.servers}"
                          param="deploy.server"
                          target="deploy.direct" />
-              </then>
-            </elseif>
-            <elseif>
-                <equals arg1="${deploy.strategy}" arg2="hybrid" />
-              <then>
-                <echo msg="executing hybrid deployment ... " />
-                <echo msg="============================ " />
-                <property name="deploy.server" value="${deploy.remote}" override="true"/>
-                <property name="deploy.path"   value="${deploy.remotedir}" override="true"/>
-                <property name="deploy.log" override="true"
-                          value="2&gt;&amp;1 | tee -a ${deploy.path}/deploy.log"  />
-                <phingcall target="deploy.hybrid" />
               </then>
             </elseif>
             <else>
@@ -164,17 +136,19 @@
     <target name="direct" depends="deploy.convert">
 
         <!-- link it up -->
-         <ssh username="${deploy.user}"
+         <netssh username="${deploy.user}"
               password="${deploy.password}"
               host="${deploy.server}"
+              sshlib="${deploy.sshlib}"
               command="rm ${deploy.path}/current ${deploy.log};
                        ln -s ${deploy.path}/releases/${deploy.ts}
                        ${deploy.path}/current ${deploy.log}; " />
 
          <!-- deposit the deploy log in the log folder -->
-         <ssh username="${deploy.user}"
+         <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="cp ${deploy.path}/deploy.log
                       ${deploy.path}/${build.target}/logs/deploy/${deploy.ts}.deploy.log;
                       cp ${deploy.path}/deploy.log
@@ -182,30 +156,6 @@
                       rm ${deploy.path}/deploy.log; " />
 
     </target >
-
-    <!-- ============================================  -->
-    <!-- Target: hybrid                                -->
-    <!-- ============================================  -->
-    <target name="hybrid" depends="deploy.convert">
-
-        <!-- deposit the deploy log in the log folder -->
-         <ssh username="${deploy.user}"
-              password="${deploy.password}"
-              host="${deploy.server}"
-              command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
-                       phing ${deploy.execline}
-                       -Ddeploy.strategy=distributed
-                       -Ddeploy.branch=${deploy.branch})
-                       ${deploy.log}; " />
-
-        <!-- deposit the deploy log in the log folder -->
-         <ssh username="${deploy.user}"
-              password="${deploy.password}"
-              host="${deploy.server}"
-              command="cp ${deploy.path}/deploy.log
-                       ${deploy.path}/${build.target}/logs/deploy/${deploy.ts}.deploy.log;
-                       rm ${deploy.path}/deploy.log; " />
-    </target>
 
     <!-- ============================================  -->
     <!-- Target: prepare.distributed                   -->
@@ -249,9 +199,10 @@
     <!-- ============================================  -->
     <target name="prepare.direct" >
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="if [ ! -d ${deploy.path}/${build.target}/cached-copy ]; then
                         git clone -q --depth 1 ${deploy.repository}
                         ${deploy.path}/${build.target}/cached-copy ${deploy.log};
@@ -259,19 +210,22 @@
                         git submodule init) ${deploy.log};
                       fi; " />
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="mkdir -p ${deploy.path}/${build.target}/tarballs ${deploy.log};" />
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="mkdir -p ${deploy.path}/${build.target}/logs/deploy ${deploy.log};" />
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="mkdir -p ${deploy.path}/releases  ${deploy.log};" />
              
         <!-- Pre-Cache Hook -->
@@ -299,9 +253,10 @@
         </php>
 
         <!-- update the repository and reset it to the current revision -->
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                       git fetch origin) ${deploy.log};
                       echo Found current branch is ${deploy.branch} ${deploy.log};
@@ -312,9 +267,10 @@
                       git checkout -f $REV) ${deploy.log}; " />
 
         <!-- reset submodules to their appropriate revisions -->
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="for mod in `(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                       git submodule status | awk '{ print $2 }')`; do
                         (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
@@ -324,9 +280,10 @@
                       done;" />
 
         <!-- update submodules -->
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
                        git submodule update) ${deploy.log}; " />
                        
@@ -334,9 +291,10 @@
         <phingcall target="postcache" />
 
         <!-- make deployment directory and tarball archive -->
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="mkdir ${deploy.path}/releases/${deploy.ts} ${deploy.log};
                       cp -R ${deploy.path}/${build.target}/cached-copy/*
                       ${deploy.path}/releases/${deploy.ts} ${deploy.log};
@@ -351,9 +309,10 @@
                       ${deploy.path}/releases/${deploy.ts} ${deploy.log};"/>
 
         <!-- print filesize info -->
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
               password="${deploy.password}"
               host="${deploy.server}"
+              sshlib="${deploy.sshlib}"
               command="echo File size ${deploy.log};
                        echo ============== ${deploy.log};
                        B=$(stat -c %s ${deploy.path}/${build.target}/tarballs/${deploy.tarball});
@@ -372,9 +331,10 @@
         <!-- create target directory -->
         <echo msg="creating directory: ${deploy.path}/releases/${deploy.ts}" />
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="mkdir -p ${deploy.path}/releases/${deploy.ts}" />
 
         <!-- unpack tarball -->
@@ -382,41 +342,46 @@
                    to remote location: ${deploy.server}:
                    ${deploy.path}/releases/${deploy.ts}" />
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="tar -xvf ${deploy.path}/${deploy.tarball} --directory=${deploy.path}/releases/${deploy.ts}" />
 
         <!-- delete tarball -->
         <echo msg="deleting tarball: ${deploy.path}/${deploy.tarball}" />
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="rm ${deploy.path}/${deploy.tarball}" />
 
         <!-- link it -->
         <echo msg="deleting symlink: ${deploy.path}/current" />
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="rm ${deploy.path}/current" />
 
         <echo msg="creating new symlink: ${deploy.path}/current" />
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="ln -s ${deploy.path}/releases/${deploy.ts}
                       ${deploy.path}/current" />
 
         <!-- revision tag -->
         <echo msg="placing hash in REVISION: ${deploy.revision}" />
 
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="echo ${deploy.revision} > ${deploy.path}/current/REVISION" />
 
     </target>
@@ -430,9 +395,10 @@
 
         <echo msg="to server: ${deploy.server}" />
 
-        <scp username="${deploy.user}"
+        <netscp username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              todir="${deploy.path}"
              file="${project.basedir}/${build.target}/tarballs/${deploy.tarball}" />
 
@@ -488,9 +454,10 @@
     <!-- ============================================  -->
     <target name="memcached" >
         <echo msg="restarting memcached" />
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="echo ${deploy.password} | sudo -S /etc/init.d/memcached restart" />
     </target>
 
@@ -507,9 +474,10 @@
     <!-- ============================================  -->
     <target name="remotecmd" >
         <echo msg="${deploy.user}&#64;${deploy.server}&#36; ${command}" />
-        <ssh username="${deploy.user}"
+        <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
+             sshlib="${deploy.sshlib}"
              command="echo ${deploy.password} | ${command}" />
     </target>
 

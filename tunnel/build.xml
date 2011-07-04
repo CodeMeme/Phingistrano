@@ -1,23 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="tunnel" description="Not your average mole." default="info" >
 
-    <!-- ============================================ -->
-    <!-- (DEFAULT) Target: info                       -->
-    <!-- ============================================ -->
-    <target name="info" >
-    
-        <php function="dirname" returnProperty="tunnel.basedir">
-            <param value="${phing.file.tunnel}" />
-        </php>
-        
-        <exec dir="${tunnel.basedir}" 
-              outputProperty="targets" 
-              command="phing -list -quiet" />
-        
-        <echo msg="${targets}" />
-        
-    </target>
-
     <!-- ============================================  -->
     <!-- Target: open                                  -->
     <!-- ============================================  -->

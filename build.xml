@@ -1,28 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="modules" description="phing loading external modules" default="info">
-    <php function="dirname" returnProperty="modules.basedir">
-        <param value="${phing.file.modules}"/>
-    </php>
 
-    <import file="${modules.basedir}/deploy/build.xml" />
-    <import file="${modules.basedir}/version/build.xml" />
-    <import file="${modules.basedir}/sniff/build.xml" />
-    <import file="${modules.basedir}/docs/build.xml" />
-    <import file="${modules.basedir}/test/build.xml" />
-    <import file="${modules.basedir}/rollback/build.xml" />
-    <import file="${modules.basedir}/tunnel/build.xml" />
-
-    <!-- ============================================ -->
-    <!-- (DEFAULT) Target: help                       -->
-    <!-- ============================================ -->
-
-    <target name="help" >
-        <exec command="phing -list -quiet" dir="${project.basedir}" outputProperty="modules" />
-        <php expression="substr('${modules}', 0, strpos('${modules}','Subtargets:'))" returnProperty="modules" />
-        <echo msg="${modules}" />
-    </target>
-    <!-- shortcut to help -->
-    <target name="info" depends="help" />
+    <import file="${phingistrano.dir}/deploy/build.xml" />
+    <import file="${phingistrano.dir}/version/build.xml" />
+    <import file="${phingistrano.dir}/sniff/build.xml" />
+    <import file="${phingistrano.dir}/docs/build.xml" />
+    <import file="${phingistrano.dir}/test/build.xml" />
+    <import file="${phingistrano.dir}/rollback/build.xml" />
+    <import file="${phingistrano.dir}/tunnel/build.xml" />
 
 
     <!-- generic declarations -->

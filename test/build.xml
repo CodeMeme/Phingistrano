@@ -1,24 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="test" description="testing" default="do" >
 
-    <property name="build.target"        value=".build" />
-    
-    <!-- ============================================ -->
-    <!-- (DEFAULT) Target: info                       -->
-    <!-- ============================================ -->
-    <target name="info" >
-    
-        <php function="dirname" returnProperty="test.basedir">
-            <param value="${phing.file.test}" />
-        </php>
-        
-        <exec dir="${test.basedir}" 
-              outputProperty="targets" 
-              command="phing -list -quiet" />
-              
-        <echo msg="${targets}" />
-        
-    </target>
+    <!-- unit test properties -->
+    <property name="test.bootstrap"    value="${build.target}/tests/bootstrap.php" />
+    <property name="test.dir"          value="${project.basedir}" />
+    <property name="test.incpattern"   value="**/*Test.php" />
+    <property name="test.excpattern"   value="" />
+    <property name="test.type"         value="xml" />
+    <property name="test.usefile"      value="true" />
+    <property name="test.haltfail"     value="true" />
+    <property name="test.halterror"    value="true" />
 
     <!-- ============================================  -->
     <!-- Target: prepare                               -->
@@ -44,8 +35,6 @@
     <!-- Target: do                                    -->
     <!-- ============================================  -->
     <target name="do" depends="test.prepare" >
-
-        <property name="test.bootstrap" value="${project.basedir}/TestStrap.php" />
 
         <available file="${test.bootstrap}" property="bootstrapexists" value="Yes"/>
 
@@ -74,32 +63,26 @@
             <then>
 
             <echo msg="PHPUnit is testing against ${test.env} per request" />
-
-                <echo file="TestHelper.${test.env}.php" >
-                    &lt;?php
-                    putenv('APPLICATION_ENV=${test.env}');
-                    include('${test.bootstrap}');
-                </echo>
-                <property name="test.bootstrap" 
-                          value="TestHelper.${test.env}.php" 
-                          override="true" />
+                
+                <available file="${test.bootstrap}" property="envbootstrapexists" value="Yes"/>
+                
+                <if>
+                    <not>
+                        <equals arg1="${envbootstrapexists}" arg2="1" />
+                    </not>
+                    <then>
+                        <echo file="${build.target}/tests/bootstrap.${test.env}.php" >
+                            &lt;?php
+                            putenv('APPLICATION_ENV=${test.env}');
+                            include('${test.bootstrap}');
+                        </echo>
+                        <property name="test.bootstrap" 
+                                  value="${build.target}/tests/bootstrap.${test.env}.php" 
+                                  override="true" />
+                    </then>
+                </if>
             </then>
         </if>
-
-        <!-- set default unit test properties -->
-        <property name="test.dir"          value="${project.basedir}" />
-        
-        <property name="test.incpattern"   value="**/*Test.php" />
-        
-        <property name="test.excpattern"   value="" />
-        
-        <property name="test.type" value="xml" />
-        
-        <property name="test.usefile" value="true" />
-        
-        <property name="test.haltfail" value="true" />
-        
-        <property name="test.halterror" value="true" />
 
         <!-- run unit test -->
         <phpunit bootstrap="${test.bootstrap}"
@@ -121,9 +104,6 @@
             </batchtest>
             
         </phpunit>
-
-        <delete file="TestHelper.${test.env}.php" quiet="true" />
-        
     </target>
 
 </project>

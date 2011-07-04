@@ -4,29 +4,17 @@
     <!-- ============================================  -->
     <!-- Custom Properties                             -->
     <!-- ============================================  -->
-    <php function="dirname" returnProperty="version.basedir">
-        <param value="${phing.file.version}"/>
-    </php>
     <property name="repo.dir" value="${project.basedir}" />
 
     <!-- ============================================  -->
     <!-- Custom Taskdefs                               -->
     <!-- ============================================  -->
-    <taskdef classpath="${version.basedir}/" classname="GitDescribeTask"   name="gitdescribe" />
-    <taskdef classpath="${version.basedir}/" classname="GitDiffTask"       name="gitdiff" />
-    <taskdef classpath="${version.basedir}/" classname="GitLogTask"        name="gitlog" />
-    <taskdef classpath="${version.basedir}/" classname="GitRemoteShowTask" name="gitremoteshow" />
-    <taskdef classpath="${version.basedir}/" classname="GitTagTask"        name="gittag" />
-    <taskdef classpath="${version.basedir}/" classname="MimeMailTask"      name="mimemail" />
-
-    <!-- ============================================ -->
-    <!-- (DEFAULT) Target: info                       -->
-    <!-- ============================================ -->
-    <target name="info" >
-        <exec command="phing -list -quiet" dir="${version.basedir}" outputProperty="targets" />
-        <echo msg="${targets}" />
-    </target>
-    <target name="help"  depends="info" />
+    <taskdef classpath="${phingistrano.dir}" classname="version.GitDescribeTask"   name="gitdescribe" />
+    <taskdef classpath="${phingistrano.dir}" classname="version.GitDiffTask"       name="gitdiff" />
+    <taskdef classpath="${phingistrano.dir}" classname="version.GitLogTask"        name="gitlog" />
+    <taskdef classpath="${phingistrano.dir}" classname="version.GitRemoteShowTask" name="gitremoteshow" />
+    <taskdef classpath="${phingistrano.dir}" classname="version.GitTagTask"        name="gittag" />
+    <taskdef classpath="${phingistrano.dir}" classname="version.MimeMailTask"      name="mimemail" />
 
     <!-- ============================================  -->
     <!-- Target: pushtags                                -->
@@ -184,7 +172,7 @@
                   from="${version.from}"
                   to="${version.to}"
                   subject="[${endTag}] Release of '${phing.project.name}': ${shortDiffStat}"
-                  template="${version.basedir}/notify.html" />
+                  template="${phingistrano.dir}/version/notify.html" />
     </target>
 
 </project>

@@ -29,7 +29,7 @@ require_once 'phing/Task.php';
  * @package   phing.tasks.ext
  */
 
-class ScpTask extends Task
+class NetScpTask extends Task
 {
     protected $file = "";
     protected $filesets = array(); // all fileset objects assigned to this task
