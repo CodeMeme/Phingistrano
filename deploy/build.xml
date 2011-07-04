@@ -22,6 +22,12 @@
         <echo msg="${targets}" />
 
     </target>
+    
+    <!-- ============================================  -->
+    <!-- Custom Taskdefs                               -->
+    <!-- ============================================  -->
+    <taskdef classpath="${deploy.basedir}/" classname="SshTask"   name="ssh" />
+    <taskdef classpath="${deploy.basedir}/" classname="ScpTask"   name="scp" />
 
     <!-- ============================================  -->
     <!-- Target: do                                    -->

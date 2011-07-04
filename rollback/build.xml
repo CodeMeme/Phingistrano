@@ -24,6 +24,12 @@
     </target>
     
     <target name="help"  depends="info" />
+    
+    <!-- ============================================  -->
+    <!-- Custom Taskdefs                               -->
+    <!-- ============================================  -->
+    <taskdef classpath="${rollback.basedir}/" classname="SshTask"   name="ssh" />
+    <taskdef classpath="${rollback.basedir}/" classname="ScpTask"   name="scp" />
 
     <!-- ============================================  -->
     <!-- Target: do                                    -->
