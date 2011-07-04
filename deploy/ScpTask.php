@@ -530,7 +530,7 @@ class ScpTask extends Task
             
             $this->log('Will copy ' . $localEndpoint . ' to ' . $remoteEndpoint, $this->logLevel);
             
-            $ret = $this->connection->put($remoteEndpoint, file_get_contents($localEndpoint));
+            $ret = $this->connection->put($remoteEndpoint, $localEndpoint, NET_SFTP_LOCAL_FILE);
 
             if ($ret === false) {
                 throw new BuildException("Could not create remote file '" . $remoteEndpoint . "'");
