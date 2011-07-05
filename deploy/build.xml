@@ -5,6 +5,7 @@
     <property name="deploy.branch"       value="master" />
     <property name="deploy.cacheexists"  value="false" override="true" />
     <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
+    <property name="deploy.strategy"     value="distributed" />
     <property name="deploy.sshlib"       value="" />
     
     <!-- ============================================  -->
