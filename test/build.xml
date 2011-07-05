@@ -36,12 +36,10 @@
     <!-- ============================================  -->
     <target name="do" depends="test.prepare" >
 
-        <available file="${test.bootstrap}" property="bootstrapexists" value="Yes"/>
-
         <!-- create a test bootstrap if one doesnt exist -->
         <if>
             <not>
-                <equals arg1="${bootstrapexists}" arg2="1" />
+                <available file="${test.bootstrap}" property="bootstrapexists" />
             </not>
             <then>
                 <echo file="${test.bootstrap}" 
