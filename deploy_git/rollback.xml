@@ -1,28 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="rollback" description="utilities for rolling back  deployments" default="info" >
 
+    <!-- rollback properties -->
     <property name="rollback.direction" value="reverse"/>
     <property name="rollback.depth"     value="1" />
     <property name="rollback.selected"  value="false" />
-
-    <!-- ============================================ -->
-    <!-- (DEFAULT) Target: info                       -->
-    <!-- ============================================ -->
-    <target name="info" >
-    
-        <php function="dirname" returnProperty="rollback.basedir">
-            <param value="${phing.file.rollback}" />
-        </php>
-        
-        <exec dir="${rollback.basedir}" 
-              outputProperty="targets" 
-              command="phing -list -quiet" />
-              
-        <echo msg="${targets}" />
-        
-    </target>
-    
-    <target name="help"  depends="info" />
+    <property name="rollback.sshlib"    value="" />
 
     <!-- ============================================  -->
     <!-- Target: do                                    -->
@@ -49,26 +32,30 @@
         <!-- take snapshot of all deployments -->
         <ssh username="${deploy.user}"
              password="${deploy.password}"
-             host="${rollback.server}" 
+             host="${rollback.server}"
+             sshlib="${rollback.sshlib}"
              command="ls -t ${deploy.path}/releases > ${deploy.path}/list.tmp" />
 
         <!-- take snapshot of current deployment pointer -->
         <ssh username="${deploy.user}"
              password="${deploy.password}"
-             host="${rollback.server}" 
+             host="${rollback.server}"
+             sshlib="${rollback.sshlib}"
              command="ls -l ${deploy.path} | grep current > ${deploy.path}/pointer.tmp" />
 
         <!-- download snapshots -->
         <scp username="${deploy.user}" 
              password="${deploy.password}" 
-             host="${rollback.server}" 
+             host="${rollback.server}"
+             sshlib="${rollback.sshlib}"
              fetch="true" 
              todir="${project.basedir}" 
              file="${deploy.path}/list.tmp" />
 
         <scp username="${deploy.user}" 
              password="${deploy.password}" 
-             host="${rollback.server}" 
+             host="${rollback.server}"
+             sshlib="${rollback.sshlib}"
              fetch="true" 
              todir="${project.basedir}" 
              file="${deploy.path}/pointer.tmp" />
@@ -76,7 +63,8 @@
         <!-- delete temporary remote files -->
         <ssh username="${deploy.user}" 
              password="${deploy.password}"
-             host="${rollback.server}" 
+             host="${rollback.server}"
+             sshlib="${rollback.sshlib}"
              command="rm ${deploy.path}/*.tmp" />
 
     </target>
@@ -184,14 +172,16 @@
         
         <ssh username="${deploy.user}" 
              password="${deploy.password}"
-             host="${rollback.server}" 
+             host="${rollback.server}"
+             sshlib="${rollback.sshlib}"
              command="rm ${deploy.path}/current" />
 
         <echo msg="creating new symlink: ${deploy.deploy_to}/current" />
         
         <ssh username="${deploy.user}" 
              password="${deploy.password}"
-             host="${rollback.server}" 
+             host="${rollback.server}"
+             sshlib="${rollback.sshlib}"
              command="ln -s ${deploy.path}/releases/${rollback.target} 
                       ${deploy.path}/current" />
 
@@ -200,7 +190,8 @@
         
         <ssh username="${deploy.user}" 
              password="${deploy.password}"
-             host="${rollback.server}" 
+             host="${rollback.server}"
+             sshlib="${rollback.sshlib}"
              command="echo ${deploy.password} | 
                       sudo -S /etc/init.d/memcached restart" />
                       

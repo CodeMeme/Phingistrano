@@ -6,6 +6,10 @@ Ive added an example of a helpers file that you could use to help manage a symfo
 [Check it out](https://github.com/CodeMeme/Phingistrano/blob/develop/symfony2.helpers.xml)  
 [README][symfony2]
 
+## NEW! phpseclib library ##
+Ive added the ability to use a "Pure PHP" implementation of ssh2 thanks to the PEAR seclib library. For those who have had trouble with using Phingistrano because of the SSH2 dependency, you may want to have a look.    
+[README][phpseclib]
+
 ## Table of Contents ##
 * [Overview][overview]
 * [Command line usage][commandline]
@@ -109,6 +113,31 @@ Also included in the repo, these phing git extensions by Evan Kaufman:
     sudo pear install pear/Mail
     sudo pear install pear/Mail_Mime
 
+<a name="phpseclib" />
+
+## SSH2 PHP Extension *OR* phpseclib Net_SSH2 ##
+Since the PHP ssh2 extension has been difficult to install, and for some people impossible to extend php due to system permissions, You can use this library, PHPs SSH2 extension or both.
+
+[phpseclib]: #phpseclib
+### phpseclib Net_SSH2 and NetSFTP ###
+
+Ive tailored a custom ssh task for Phingistrano that will also use the Net_SSH2 and Net_SFTP classes from the [PEAR phpseclib library](http://phpseclib.sourceforge.net/documentation/net.html#net_ssh_dependencies). 
+
+The one drawback that I've found about this library is that uploads can be *VERY* slow. If the upload speed becomes a problem for you, then I suggest looking into the direct strategy for deployment as it requires no uploading.
+
+You can install the [phpseclib](http://phpseclib.sourceforge.net/pear.htm) dependencies with the following commands:
+
+    sudo pear channel-discover phpseclib.sourceforge.net
+    sudo pear install phpseclib/Net_SSH2
+    sudo pear install phpseclib/Net_SFTP
+    sudo pear install phpseclib/Math_BigInteger
+    sudo pear install phpseclib/Crypt_Random
+    sudo pear install phpseclib/Crypt_Hash
+    sudo pear install phpseclib/Crypt_TripleDES
+    sudo pear install phpseclib/Crypt_RC4
+    sudo pear install phpseclib/Crypt_AES
+    sudo pear install phpseclib/Crypt_RSA
+
 ### SSH2 PHP Extension ###
 
 This repo needs the php ssh2 extension. 
@@ -174,17 +203,87 @@ The content of your build.xml should be like this:
 
     <?xml version="1.0" encoding="UTF-8"?>
     <project name="myproject" default="help">
+    
+    <!-- Required properties -->
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
+    <property name="build.target"      value=".build" />
 
     </project>
+    
+The path to Phingistrano will vary depending on your installation. Possibly you could even add the Phingistrano library by pear, or however you want.
+
+### required properties ###
+
+This Readme document outlines required properties for each module under heading "The Modules" For my example, I will show you how you should add the properties to your build file:
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <project name="Phingistrano" default="help">
+
+    <!-- Required properties -->
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
+    <property name="build.target"      value=".build" />
+    <property name="deploy.user"       value="jesse" />
+    <property name="deploy.password"   value="jiveturkey" />
+    <property name="deploy.path"       value="/var/www/deployments/${phing.project.name}/${deploy.branch}" />
+    <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
+    <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
+    <property name="version.to"        value="jesse@codememe.com" />
+    <property name="version.from"      value="robot@codememe.com" />
+
+    </project>
+    
+### Optional Properties ###
+
+This is a list of properties available for the individual modules but not needed for successful execution. You can use these properties to configure your deployment, or leave them out if you accept the defaults.
+
+    <!-- available properties (not required) -->
+        <!-- deploy common -->
+        <property name="deploy.branch"      value="master" />
+        <property name="tunnel.configured"  value="false" />
+
+        <!-- deploy direct -->
+        <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
+        
+        <!-- test phpunit -->
+        <property name="test.bootstrap"    value="${build.target}/tests/bootstrap.php" />
+        <property name="test.dir"          value="${project.basedir}" />
+        <property name="test.incpattern"   value="**/*Test.php" />
+        <property name="test.excpattern"   value="" />
+        <property name="test.type"         value="xml" />
+        <property name="test.usefile"      value="true" />
+        <property name="test.haltfail"     value="true" />
+        <property name="test.halterror"    value="true" />
+        
+        <!-- sniff phpcs -->
+        <property name="sniff.standard"         value="PEAR" />
+        <property name="sniff.ignorepatterns"   value="${build.target},vendor,Sniff.php" />
+        <property name="sniff.show"             value="true" />
+        
+        <!-- docs phpdocumentor -->
+        <property name="docs.destdir"       value="${build.target}/docs" />
+        <property name="docs.target"        value="${project.basedir}" />
+        <property name="docs.ignore"        value="" />
+        <property name="docs.output"        value="HTML:frames:DOM/earthli" />
 
 ### Importing the build submodule ###
 
 Now that you've got your build file, you need to import the modules. The build submodule 
-comes with a main build xml that can be imported if you want to use all the modules. You can 
+comes with a main build xml that can be imported if you want to use all the modules. Imports should always be underneath the predefined properties to ensure that the properties in the modules can be overridden by your preferences. You can 
 add it like this (vendor/Phingistrano is the path of how I set up my submodule):
 
     <?xml version="1.0" encoding="UTF-8"?>
     <project name="myproject" default="help">
+    
+    <!-- Required properties -->
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
+    <property name="build.target"      value=".build" />
+    <property name="deploy.user"       value="jesse" />
+    <property name="deploy.password"   value="jiveturkey" />
+    <property name="deploy.path"       value="/var/www/deployments/${phing.project.name}/${deploy.branch}" />
+    <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
+    <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
+    <property name="version.to"        value="jesse@codememe.com" />
+    <property name="version.from"      value="robot@codememe.com" />
 
     <!-- Imports -->
     <import file="${project.basedir}/build.helpers.xml" />
@@ -203,6 +302,17 @@ your main build file by adjusting the path like this:
 
     <?xml version="1.0" encoding="UTF-8"?>
     <project name="myproject" default="help">
+    
+    <!-- Required properties -->
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
+    <property name="build.target"      value=".build" />
+    <property name="deploy.user"       value="jesse" />
+    <property name="deploy.password"   value="jiveturkey" />
+    <property name="deploy.path"       value="/var/www/deployments/${phing.project.name}/${deploy.branch}" />
+    <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
+    <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
+    <property name="version.to"        value="jesse@codememe.com" />
+    <property name="version.from"      value="robot@codememe.com" />
 
     <!-- Imports -->
     <import file="${project.basedir}/vendor/Phingistrano/deploy/build.xml" />
@@ -234,43 +344,7 @@ namespace will work. Like this:
     </project> 
 This is due to how phing handles namespaced targets.
 
-### required properties ###
 
-This Readme document outlines required properties for each module under heading "The Modules"
-For my example, I will show you how you should add the properties to your build file:
-
-    <?xml version="1.0" encoding="UTF-8"?>
-    <project name="Phingistrano" default="help">
-
-    <!-- Imports -->
-    <import file="${project.basedir}/build.helpers.xml" />
-    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
-
-    <!-- Required properties -->
-    <property name="build.target"      value=".build" />
-    <property name="deploy.strategy"   value="distributed" />
-    <property name="deploy.remote"     value="172.99.99.91" />
-    <property name="deploy.remotedir"  value="~/${phing.project.name}" />
-    <property name="deploy.execline"   value="deploy.production" />
-    <property name="deploy.branch"     value="master" />
-    <property name="deploy.user"       value="jesse" />
-    <property name="deploy.password"   value="jiveturkey" />
-    <property name="deploy.path"       value="/var/www/deployments/schools/${deploy.branch}" />
-    <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
-    <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
-    <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
-    <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
-    <property name="test.dir"          value="${project.basedir}/src" />
-    <property name="test.incpattern"   value="**/*Test.php" />
-    <property name="test.excpattern"   value="" />
-    <property name="version.to"        value="jesse@codememe.com" />
-    <property name="version.from"      value="robot@codememe.com" />
-    <property name="sniff.standard"    value="PEAR" />
-    <property name="docs.destdir"      value="${project.basedir}/build/docs" />
-    <property name="docs.appdir"       value="${project.basedir}/app" />
-    <property name="docs.library"      value="${project.basedir}/src" />
-
-    </project>
 
 ### Main Targets ###
 
@@ -280,33 +354,20 @@ that you enter on the command line when you use phing. i.e : $phing [ target ]
     <?xml version="1.0" encoding="UTF-8"?>
     <project name="Phingistrano" default="help">
 
+    <!-- Required properties -->
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
+    <property name="build.target"      value=".build" />
+    <property name="deploy.user"       value="jesse" />
+    <property name="deploy.password"   value="jiveturkey" />
+    <property name="deploy.path"       value="/var/www/deployments/${phing.project.name}/${deploy.branch}" />
+    <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
+    <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
+    <property name="version.to"        value="jesse@codememe.com" />
+    <property name="version.from"      value="robot@codememe.com" />
+    
     <!-- Imports -->
     <import file="${project.basedir}/build.helpers.xml" />
     <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
-
-    <!-- Required properties -->
-    <property name="build.target"      value=".build" />
-    <property name="deploy.strategy"   value="distributed" />
-    <property name="deploy.remote"     value="172.99.99.91" />
-    <property name="deploy.remotedir"  value="~/${phing.project.name}" />
-    <property name="deploy.execline"   value="deploy.production" />
-    <property name="deploy.branch"     value="master" />
-    <property name="deploy.user"       value="jesse" />
-    <property name="deploy.password"   value="jiveturkey" />
-    <property name="deploy.path"       value="/var/www/deployments/schools/${deploy.branch}" />
-    <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
-    <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
-    <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
-    <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
-    <property name="test.dir"          value="${project.basedir}/src" />
-    <property name="test.incpattern"   value="**/*Test.php" />
-    <property name="test.excpattern"   value="" />
-    <property name="version.to"        value="jesse@codememe.com" />
-    <property name="version.from"      value="robot@codememe.com" />
-    <property name="sniff.standard"    value="PEAR" />
-    <property name="docs.destdir"      value="${project.basedir}/build/docs" />
-    <property name="docs.appdir"       value="${project.basedir}/app" />
-    <property name="docs.library"      value="${project.basedir}/src" />
 
     <!-- Main Targets -->
     <target name="help"
@@ -378,33 +439,20 @@ as a dependency:
     <?xml version="1.0" encoding="UTF-8"?>
     <project name="Phingistrano" default="help">
 
-    <!-- Imports -->
-    <import file="${project.basedir}/build.helpers.xml" />
-    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />
-
     <!-- Required properties -->
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
     <property name="build.target"      value=".build" />
-    <property name="deploy.strategy"   value="distributed" />
-    <property name="deploy.remote"     value="172.99.99.91" />
-    <property name="deploy.remotedir"  value="~/${phing.project.name}" />
-    <property name="deploy.execline"   value="deploy.production" />
-    <property name="deploy.branch"     value="master" />
     <property name="deploy.user"       value="jesse" />
     <property name="deploy.password"   value="jiveturkey" />
-    <property name="deploy.path"       value="/var/www/deployments/schools/${deploy.branch}" />
+    <property name="deploy.path"       value="/var/www/deployments/${phing.project.name}/${deploy.branch}" />
     <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
-    <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
-    <property name="test.bootstrap"    value="${project.basedir}/tests/TestHelper.php" />
-    <property name="test.dir"          value="${project.basedir}/src" />
-    <property name="test.incpattern"   value="**/*Test.php" />
-    <property name="test.excpattern"   value="" />
     <property name="version.to"        value="jesse@codememe.com" />
     <property name="version.from"      value="robot@codememe.com" />
-    <property name="sniff.standard"    value="PEAR" />
-    <property name="docs.destdir"      value="${project.basedir}/build/docs" />
-    <property name="docs.appdir"       value="${project.basedir}/app" />
-    <property name="docs.library"      value="${project.basedir}/src" />   
+    
+    <!-- Imports -->
+    <import file="${project.basedir}/build.helpers.xml" />
+    <import file="${project.basedir}/vendor/Phingistrano/build.xml" />   
 
     <!-- Main Targets -->
     <target name="help"
@@ -469,6 +517,16 @@ attempt to outline what the properties are and what they do.
 
 #### Global properties ####
 
+    <!-- required properties -->
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
+    <property name="build.target"      value=".build" />
+    
+##### phingistrano.dir #####
+
+This is the path to the location of your Phingistrano libraries. This is important due to how the modules work. With this value set, you can use one central phingistrano repository for all of your projects, possibly even install it via a Pear channel, or just keep the library in any place of your choosing. It is required, however, to set this value because modules no longer self resolve.  
+
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
+
 ##### build.target #####
 
 This is the folder that your build related media will appear. By default it creates and uses the folder: .build  
@@ -503,6 +561,19 @@ Runs a target called "postcache" immediately as the cacheing is completed and be
 Runs a target called "precache" right before you enter in to the repository cacheing part of deploy. This is useful if there are certain treatments, specific to the project, that you need to run before the repository gets cached
 
 #### Deploy properties ####
+
+    <!-- deploy properties -->
+    <!-- required -->
+    <property name="deploy.user"       value="jesse" />
+    <property name="deploy.password"   value="jiveturkey" />
+    <property name="deploy.path"       value="/var/www/deployments/${phing.project.name}/${deploy.branch}" />
+    <property name="deploy.repository" value="git@github.com:CodeMeme/${phing.project.name}.git" />
+    <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
+    
+    <!-- optional -->
+    <property name="deploy.branch"       value="master" />
+    <property name="deploy.cacheexists"  value="false" override="true" />
+    <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
 
 ##### deploy.branch #####
 
@@ -555,12 +626,10 @@ A deployment strategy must be defined but distributed will be defined by default
 
     <property name="deploy.strategy"   value="distributed" />
     <property name="deploy.strategy"   value="direct" />
-    <property name="deploy.strategy"   value="hybrid" />
 
 #### Deploy strategies ####
 
-Each different kind of deployment is called a strategy.
-There are now 3 different strategies available for deployment
+There are two different deployment strategies: distributed and direct.
 
 ##### Distributed #####
 
@@ -569,28 +638,21 @@ deployment tarball. The deployment tarball is uploaded to your designated deploy
 
 ##### Direct #####
 
-This strategy uses the least bandwidth. This downloads or updates your git respository 
+This strategy uses very little bandwidth (good for large projects that take forever to upload). This downloads or updates your git respository 
 directly on the deployment servers. A tarball is still created but is not uploaded. The cached 
 copy is formatted and moved in place to your deployment directory.
 
 ##### Hybrid #####
 
-This strategy uses elements of both direct and distributed. This downloads or updates your git 
-repository to a remote server, and from the remote server it runs a distributed strategy to 
-distribute your build to the deployment servers. This strategy requires a remote server and 
-requires that the remote server has phing and all the necessary dependencies for your build
-routine.
-
-hybrid needs the following properties in addition to the rest of the deploy properties  
-
-    <property name="deploy.remote"     value="172.97.97.97" />
-    <property name="deploy.remotedir"  value="~" />
-    <property name="deploy.execline"   value="deploy.production" />
-
-<a name="rollback" /> 
+Hybrid strategy has been depreciated. It was too complicated to set up and had problems. If you are trying to run a hybrid strategy, the easiest way is to set up a distributed strategy on a remote server, and just trigger the phing target with a remote command in your local helpers file.
 
 [rollback]: #rollback
 ### Rollback ###
+
+    <!-- rollback properties -->
+    <property name="rollback.direction" value="reverse"/>
+    <property name="rollback.depth"     value="1" />
+    <property name="rollback.selected"  value="false" />
 
 #### Command line usage ####
 
@@ -603,6 +665,16 @@ hybrid needs the following properties in addition to the rest of the deploy prop
 
 [test]: #test
 ### Test ###
+
+    <!-- unit test properties -->
+    <property name="test.bootstrap"    value="${build.target}/tests/bootstrap.php" />
+    <property name="test.dir"          value="${project.basedir}" />
+    <property name="test.incpattern"   value="**/*Test.php" />
+    <property name="test.excpattern"   value="" />
+    <property name="test.type"         value="xml" />
+    <property name="test.usefile"      value="true" />
+    <property name="test.haltfail"     value="true" />
+    <property name="test.halterror"    value="true" />
 
 #### test.bootstrap ####
 
@@ -640,6 +712,11 @@ At this time only one line of exclusion is supported.
 [version]: #version
 ### Version ###
 
+    <!-- version properties -->
+    <!-- required -->
+    <property name="version.to"        value="jesse@codememe.com" />
+    <property name="version.from"      value="robot@codememe.com" />
+
 #### version.to and version.from ####
 
 The version.to property is the email address which the notification will be sent to on a new version.  
@@ -652,6 +729,11 @@ version.from is the email address of who or what the mail will be sent from.
 
 [sniff]: #sniff
 ### Sniff ###
+
+    <!-- code sniff properties -->
+    <property name="sniff.standard"         value="PEAR" />
+    <property name="sniff.ignorepatterns"   value="${build.target},vendor,Sniff.php" />
+    <property name="sniff.show"             value="true" />
 
 #### sniff.standard ####
  
@@ -666,23 +748,29 @@ path to a custom ruleset.xml file.
 [docs]: #docs
 ## Docs ###
 
+    <!-- set default documentor properties -->
+    <property name="docs.destdir"      value="${build.target}/docs" />
+    <property name="docs.target"       value="${project.basedir}" />
+    <property name="docs.ignore"       value="" />
+    <property name="docs.output"       value="HTML:frames:DOM/earthli" />
+
 #### docs.destdir ####
 
 This is the directory that your docs will be generated in.
 
     <property name="docs.destdir"       value="${project.basedir}/build/docs" /> 
 
-#### docs.library ####
+#### docs.target ####
 
-This should be a path to a library folder that you may want the documentor to make a pass over
+This should be a path to a folder that you may want the documentor to make a pass over
     
-    <property name="docs.library"      value="${project.basedir}/src" />
+    <property name="docs.target"       value="${project.basedir}" />
     
-#### docs.appdir ####
+#### docs.output ####
 
-This should be a path to your application directory
+PHPDocumentor output format 
 
-    <property name="docs.appdir"       value="${project.basedir}/app" />
+    <property name="docs.output"       value="HTML:frames:DOM/earthli" />
     
 <a name="symfony2" />
 

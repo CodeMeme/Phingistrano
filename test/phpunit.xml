@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="test" description="testing" default="do" >
-    
-    <!-- set default unit test properties -->
+
+    <!-- unit test properties -->
     <property name="test.bootstrap"    value="${build.target}/tests/bootstrap.php" />
     <property name="test.dir"          value="${project.basedir}" />
     <property name="test.incpattern"   value="**/*Test.php" />
@@ -10,7 +10,6 @@
     <property name="test.usefile"      value="true" />
     <property name="test.haltfail"     value="true" />
     <property name="test.halterror"    value="true" />
-    
 
     <!-- ============================================  -->
     <!-- Target: prepare                               -->

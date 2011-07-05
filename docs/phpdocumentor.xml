@@ -6,23 +6,6 @@
     <property name="docs.target"       value="${project.basedir}" />
     <property name="docs.ignore"       value="" />
     <property name="docs.output"       value="HTML:frames:DOM/earthli" />
-    
-    <!-- ============================================ -->
-    <!-- (DEFAULT) Target: info                       -->
-    <!-- ============================================ -->
-    <target name="info" >
-
-        <php function="dirname" returnProperty="docs.basedir">
-            <param value="${phing.file.docs}" />
-        </php>
-        <exec dir="${docs.basedir}"
-              outputProperty="targets"
-              command="phing -list -quiet" />
-        <echo msg="${targets}" />
-
-    </target>
-
-    <target name="help"  depends="info" />
 
     <!-- ============================================  -->
     <!-- Target: doc                                   -->

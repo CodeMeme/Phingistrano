@@ -2,6 +2,7 @@
 <project name="Phingistrano" default="help">
 
     <!-- Required properties -->
+    <property name="phingistrano.dir"  value="${project.basedir}/vendor/Phingistrano" />
     <property name="build.target"      value=".build" />
     <property name="deploy.user"       value="jesse" />
     <property name="deploy.password"   value="jiveturkey" />
