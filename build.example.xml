@@ -43,11 +43,11 @@
         
     <!-- Imports -->
     <import file="${project.basedir}/build.helpers.xml" />
-    <import file="${project.basedir}/vendor/Phingistrano/deploy_git/distributed.xml" />
-    <import file="${project.basedir}/vendor/Phingistrano/version_git/version.xml" />
-    <import file="${project.basedir}/vendor/Phingistrano/test/phpunit.xml" />
-    <import file="${project.basedir}/vendor/Phingistrano/sniff/phpcs.xml" />
-    <import file="${project.basedir}/vendor/Phingistrano/docs/phpdocumentor.xml" />
+    <import file="${phingistrano.dir}/deploy_git/distributed.xml" />
+    <import file="${phingistrano.dir}/version_git/version.xml" />
+    <import file="${phingistrano.dir}/test/phpunit.xml" />
+    <import file="${phingistrano.dir}/sniff/phpcs.xml" />
+    <import file="${phingistrano.dir}/docs/phpdocumentor.xml" />
 
 
     <!-- Main Targets -->

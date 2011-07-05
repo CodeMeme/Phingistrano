@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="deploy" description="utilities for deploying projects with the distributed strategy" default="do" >
-    <!-- import common tasks -->
-    <php function="dirname" returnProperty="deploy.basedir">
-        <param value="${phing.file.deploy}"/>
-    </php>
-    <import file="${deploy.basedir}/common.xml" />
-    <import file="${deploy.basedir}/rollback.xml" />
-
+    
     <!-- deploy properties -->
     <property name="deploy.cacheexists"  value="false" override="true" />
+    
+    <!-- deploy imports -->
+    <import file="${project.basedir.deploy}/common.xml" />
+    <import file="${project.basedir.deploy}/rollback.xml" />
 
     <!-- ============================================  -->
     <!-- Target: do                                    -->

@@ -2,7 +2,8 @@
 <project name="deploycommon" description="common targets in deploy modules" default="remote" >
     
     <!-- deploy properties -->
-    <property name="deploy.branch"     value="master" />
+    <property name="deploy.branch"      value="master" />
+    <property name="tunnel.configured"  value="false"  />
     
     <!-- ============================================  -->
     <!-- Target: currentbranch                         -->

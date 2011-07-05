@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="deploy" description="utilities for deploying projects with a direct strategy" default="do" >
-    <!-- import common tasks -->
-    <php function="dirname" returnProperty="deploy.basedir">
-        <param value="${phing.file.deploy}"/>
-    </php>
-    <import file="${deploy.basedir}/common.xml" />
-    <import file="${deploy.basedir}/rollback.xml" />
 
     <!-- deploy properties -->
     <property name="deploy.log"        value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
+    
+    <!-- deploy imports -->
+    <import file="${project.basedir.deploy}/common.xml" />
+    <import file="${project.basedir.deploy}/rollback.xml" />
     
     <!-- ============================================  -->
     <!-- Target: do                                    -->
