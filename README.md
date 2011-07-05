@@ -239,6 +239,7 @@ This is a list of properties available for the individual modules but not needed
     <!-- available properties (not required) -->
         <!-- deploy common -->
         <property name="deploy.branch"      value="master" />
+        <property name="deploy.backissue"   value="5" />
         <property name="tunnel.configured"  value="false" />
 
         <!-- deploy direct -->
@@ -571,9 +572,16 @@ Runs a target called "precache" right before you enter in to the repository cach
     <property name="deploy.servers"    value="172.99.99.99, 172.99.99.98" />
     
     <!-- optional -->
+    <property name="deploy.strategy"     value="distributed" />
+    <property name="deploy.backissue"    value="5" />
     <property name="deploy.branch"       value="master" />
-    <property name="deploy.cacheexists"  value="false" override="true" />
     <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
+    
+##### deploy.backissue #####
+
+By default, Phingistrano only keeps 5 of your most recent deployments including the current. If you would like to change the number of back deployments, you can do that with the deploy.backissue property. If you want to keep every deployment, simply set the value to zero. 
+
+    <property name="deploy.backissue"    value="5" />
 
 ##### deploy.branch #####
 

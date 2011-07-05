@@ -6,6 +6,7 @@
     <property name="deploy.cacheexists"  value="false" override="true" />
     <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     <property name="deploy.strategy"     value="distributed" />
+    <property name="deploy.backissue"    value="5" />
     <property name="deploy.sshlib"       value="" />
     
     <!-- ============================================  -->
@@ -62,7 +63,7 @@
         <!-- checkout revision -->
         <exec dir="${project.basedir}/${build.target}/cached-copy"
               outputProperty="resetresult"
-              command="git checkout -f ${deploy.revision}" />
+              command="git checkout -q -f ${deploy.revision}" />
 
         <echo msg="${resetresult}" />
 
@@ -155,6 +156,25 @@
                       cp ${deploy.path}/deploy.log
                       ${deploy.path}/releases/${deploy.ts}/log/${deploy.ts}.deploy.log;
                       rm ${deploy.path}/deploy.log; " />
+                      
+        <!-- remove extra backissue if deploy.backissue is a value -->
+        <php expression="(strnatcasecmp('${deploy.backissue}','1') &gt;=0)?'true':'false'"
+             returnProperty="deploy.removebackissue" />
+        <if>
+            <istrue value="${deploy.removebackissue}"/>
+            <then>
+            <netssh username="${deploy.user}"
+                 password="${deploy.password}"
+                 host="${deploy.server}"
+                 sshlib="${deploy.sshlib}"
+                 command="(
+                 cd ${deploy.path}/releases &amp;&amp;
+                 for dir in * ; do
+                    echo &#34;&#36;&#123;dir&#125;&#34;;
+                 done | sort -n | head -n -${deploy.backissue} | xargs -I '%' rm -rf '%'
+                 )" />
+            </then>
+        </if>
 
     </target >
 
@@ -384,7 +404,25 @@
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
              command="echo ${deploy.revision} > ${deploy.path}/current/REVISION" />
-
+        
+        <!-- remove extra backissue if deploy.backissue is a value -->
+        <php expression="(strnatcasecmp('${deploy.backissue}','1') &gt;=0)?'true':'false'"
+             returnProperty="deploy.removebackissue" />
+        <if>
+            <istrue value="${deploy.removebackissue}"/>
+            <then>
+            <netssh username="${deploy.user}"
+                 password="${deploy.password}"
+                 host="${deploy.server}"
+                 sshlib="${deploy.sshlib}"
+                 command="(
+                 cd ${deploy.path}/releases &amp;&amp;
+                 for dir in * ; do
+                    echo &#34;&#36;&#123;dir&#125;&#34;;
+                 done | sort -n | head -n -${deploy.backissue} | xargs -I '%' rm -rf '%'
+                 )" />
+            </then>
+        </if>
     </target>
 
     <!-- ============================================  -->
