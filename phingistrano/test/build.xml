@@ -7,7 +7,7 @@
     <property name="test.incpattern"   value="**/*Test.php" />
     <property name="test.excpattern"   value="" />
     <property name="test.type"         value="xml" />
-    <property name="test.usefile"      value="true" />
+    <property name="test.outfile"      value="testsuites.xml" />
     <property name="test.haltfail"     value="true" />
     <property name="test.halterror"    value="true" />
 
@@ -21,7 +21,7 @@
                    value="true" />
         <if>
             <not>
-		        <equals arg1="${test.reportsexist}" arg2="1" />
+                <istrue value="${test.reportsexist}"/>
 	        </not>
             <then>
                 <!-- create required directories -->
@@ -90,9 +90,10 @@
                  
             <formatter todir="${project.basedir}/${build.target}/reports"
                        type="${test.type}"
-                       usefile="${test.usefile}" />
+                       usefile="true" 
+                       outfile="${test.outfile}" />
                        
-            <formatter type="plain" usefile="no" />
+            <formatter type="plain" usefile="false" />
             
             <batchtest>
                 <fileset dir="${test.dir}">
