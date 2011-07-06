@@ -6,7 +6,7 @@
     <property name="deploy.cacheexists"  value="false" override="true" />
     <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     <property name="deploy.strategy"     value="distributed" />
-    <property name="deploy.backissue"    value="5" />
+    <property name="deploy.history"      value="5" />
     <property name="deploy.sshlib"       value="" />
     
     <!-- ============================================  -->
@@ -158,10 +158,10 @@
                       rm ${deploy.path}/deploy.log; " />
                       
         <!-- remove extra backissue if deploy.backissue is a value -->
-        <php expression="(strnatcasecmp('${deploy.backissue}','1') &gt;=0)?'true':'false'"
-             returnProperty="deploy.removebackissue" />
+        <php expression="(strnatcasecmp('${deploy.history}','1') &gt;=0)?'true':'false'"
+             returnProperty="deploy.removehistory" />
         <if>
-            <istrue value="${deploy.removebackissue}"/>
+            <istrue value="${deploy.removehistory}"/>
             <then>
             <netssh username="${deploy.user}"
                  password="${deploy.password}"
@@ -171,7 +171,7 @@
                  cd ${deploy.path}/releases &amp;&amp;
                  for dir in * ; do
                     echo &#34;&#36;&#123;dir&#125;&#34;;
-                 done | sort -n | head -n -${deploy.backissue} | xargs -I '%' rm -rf '%'
+                 done | sort -n | head -n -${deploy.history} | xargs -I '%' rm -rf '%'
                  )" />
             </then>
         </if>
@@ -406,10 +406,10 @@
              command="echo ${deploy.revision} > ${deploy.path}/current/REVISION" />
         
         <!-- remove extra backissue if deploy.backissue is a value -->
-        <php expression="(strnatcasecmp('${deploy.backissue}','1') &gt;=0)?'true':'false'"
-             returnProperty="deploy.removebackissue" />
+        <php expression="(strnatcasecmp('${deploy.history}','1') &gt;=0)?'true':'false'"
+             returnProperty="deploy.removehistory" />
         <if>
-            <istrue value="${deploy.removebackissue}"/>
+            <istrue value="${deploy.removehistory}"/>
             <then>
             <netssh username="${deploy.user}"
                  password="${deploy.password}"
@@ -419,7 +419,7 @@
                  cd ${deploy.path}/releases &amp;&amp;
                  for dir in * ; do
                     echo &#34;&#36;&#123;dir&#125;&#34;;
-                 done | sort -n | head -n -${deploy.backissue} | xargs -I '%' rm -rf '%'
+                 done | sort -n | head -n -${deploy.history} | xargs -I '%' rm -rf '%'
                  )" />
             </then>
         </if>

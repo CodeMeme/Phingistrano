@@ -573,15 +573,15 @@ Runs a target called "precache" right before you enter in to the repository cach
     
     <!-- optional -->
     <property name="deploy.strategy"     value="distributed" />
-    <property name="deploy.backissue"    value="5" />
+    <property name="deploy.history"      value="5" />
     <property name="deploy.branch"       value="master" />
     <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     
-##### deploy.backissue #####
+##### deploy.history #####
 
-By default, Phingistrano only keeps 5 of your most recent deployments including the current. If you would like to change the number of back deployments, you can do that with the deploy.backissue property. If you want to keep every deployment, simply set the value to zero. 
+By default, Phingistrano only keeps 5 of your most recent deployments including the current. If you would like to change the number of back deployments, you can do that with the deploy.history property. If you want to keep every deployment, simply set the value to zero. 
 
-    <property name="deploy.backissue"    value="5" />
+    <property name="deploy.history"    value="5" />
 
 ##### deploy.branch #####
 
