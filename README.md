@@ -673,6 +673,7 @@ Hybrid strategy has been depreciated. It was too complicated to set up and had p
 
 [test]: #test
 ### Test ###
+A result file of your unit testing will be found in the reports subdirectory of your build target directory. By default: /.build/reports/testsuites.xml
 
     <!-- unit test properties -->
     <property name="test.bootstrap"    value="${build.target}/tests/bootstrap.php" />
@@ -680,7 +681,7 @@ Hybrid strategy has been depreciated. It was too complicated to set up and had p
     <property name="test.incpattern"   value="**/*Test.php" />
     <property name="test.excpattern"   value="" />
     <property name="test.type"         value="xml" />
-    <property name="test.usefile"      value="true" />
+    <property name="test.outfile"      value="testsuites.xml" />
     <property name="test.haltfail"     value="true" />
     <property name="test.halterror"    value="true" />
 
@@ -714,6 +715,18 @@ The pattern of files to exclude when looking for unit tests.
 At this time only one line of exclusion is supported.
 
     <property name="test.excpattern"   value="" /> 
+    
+#### test.type ####
+
+The format of the output from testing, can be xml, plain, clover, or brief.
+
+    <property name="test.type"   value="xml" />
+    
+#### test.outfile ####
+
+The format of the the name of the output file from the testing result. The default is testsuites.xml.
+
+    <property name="test.outfile"   value="testsuites.xml" />
 
 <a name="version" />
 
