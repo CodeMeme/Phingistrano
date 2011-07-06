@@ -1,0 +1,155 @@
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks
+END
+GitGcTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitGcTaskTest.xml
+END
+GitFetchTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitFetchTaskTest.xml
+END
+GitInitTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitInitTaskTest.php
+END
+GitCheckoutTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitCheckoutTaskTest.php
+END
+GitBranchTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitBranchTaskTest.xml
+END
+GitMergeTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitMergeTaskTest.xml
+END
+GitCloneTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitCloneTaskTest.xml
+END
+GitTagTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitTagTaskTest.php
+END
+GitInitTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitInitTaskTest.xml
+END
+GitPullTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitPullTaskTest.php
+END
+GitCheckoutTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitCheckoutTaskTest.xml
+END
+GitPushTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitPushTaskTest.php
+END
+GitTestsHelper.php
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/!svn/ver/1125/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitTestsHelper.php
+END
+GitLogTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitLogTaskTest.php
+END
+GitTagTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitTagTaskTest.xml
+END
+GitPullTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitPullTaskTest.xml
+END
+GitBaseTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitBaseTest.php
+END
+GitPushTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitPushTaskTest.xml
+END
+GitGcTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitGcTaskTest.php
+END
+GitFetchTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitFetchTaskTest.php
+END
+GitLogTaskTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitLogTaskTest.xml
+END
+GitBranchTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitBranchTaskTest.php
+END
+GitMergeTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitMergeTaskTest.php
+END
+GitCloneTaskTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitCloneTaskTest.php
+END
+GitBaseTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/!svn/ver/1179/branches/2.5/test/classes/phing/tasks/ext/GitTasks/GitBaseTest.xml
+END

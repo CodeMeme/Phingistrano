@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<project name="scpTest" default="invalid">
+
+    
+    <target name="defaults" description="sets up the default values for use with individual unit tests" >
+        <property name="tmp.dir"                value="${PHING_TEST_TMP}/scp" />
+        <property name="username"               value="phing" />
+        <property name="password"               value="phingtest" />
+        <property name="host"                   value="jessegreathouse.us" />
+        <property name="port"                   value="22" />
+        <property name="pubkeyfile"             value="${tmp.dir}/id_rsa.pub" />
+        <property name="privkeyfile"            value="${tmp.dir}/id_rsa" />
+        <property name="privkeyfilepassphrase"  value="phingtestpassphrase" />
+        <property name="crypt"                  value="RSA" />
+        <property name="sshlib"                 value="netssh" />
+        <property name="autocreate"             value="true" />
+        <property name="todir"                  value="${tmp.dir}" />
+        <property name="fetch"                  value="true" />
+        <property name="file"                   value="scpFetch" />
+    </target>
+
+    <target name="invalid">
+        <fail>This file should only be run via a testcase</fail>
+    </target>
+
+    <target name="allParamsSet" description="all parameters present" depends="defaults">
+        <scp    username="${username}"
+                password="${password}"
+                host="${host}"
+                port="${port}"
+                pubkeyfile="${pubkeyfile}"
+                privkeyfile="${privkeyfile}"
+                privkeyfilepassphrase="${privkeyfilepassphrase}"
+                crypt="${crypt}"
+                sshlib="${sshlib}"
+                todir="${todir}"
+                fetch="${fetch}"
+                file="${file}" />
+    </target>
+    
+    <target name="defaultSshlib" description="able to resolve default ssh library" depends="defaults">
+        <scp    username="${username}"
+                password="${password}"
+                host="${host}"
+                todir="./"
+                file="${tmp.dir}/testUpload" />
+    </target>
+    
+    <target name="authSsh2" description="can auth with ssh2 library" depends="defaults">
+        <scp    username="${username}"
+                password="${password}"
+                host="${host}"
+                sshlib="ssh2"
+                todir="${todir}"
+                fetch="${fetch}"
+                file="${file}" />
+    </target>
+    
+    <target name="authNetssh" description="can auth with netssh library" depends="defaults">
+        <scp    username="${username}"
+                password="${password}"
+                host="${host}"
+                sshlib="netssh"
+                todir="${todir}"
+                fetch="${fetch}"
+                file="${file}" />
+    </target>
+    
+    <target name="pubkeyAuth" description="can login with public key" depends="defaults">
+        <scp    username="${username}"
+                host="${host}"
+                pubkeyfile="${pubkeyfile}"
+                privkeyfile="${privkeyfile}"
+                privkeyfilepassphrase="${privkeyfilepassphrase}"
+                sshlib="${sshlib}"
+                todir="${todir}"
+                fetch="${fetch}"
+                file="${file}" />
+    </target>
+    
+    <target name="testUpload" description="uploads test file" depends="defaults">
+        <scp    username="${username}"
+                password="${password}"
+                host="${host}"
+                sshlib="${sshlib}"
+                todir="./"
+                file="${tmp.dir}/testUpload" />
+    </target>
+    
+    <target name="testFilesetUpload" description="uploads test files from a fileset" depends="defaults">
+        <scp    username="${username}"
+                password="${password}"
+                host="${host}"
+                sshlib="ssh2"
+                todir="./" >
+                <fileset dir="${tmp.dir}">
+                    <include name="*.fs" />
+                </fileset>
+        </scp>
+    </target>
+
+</project>

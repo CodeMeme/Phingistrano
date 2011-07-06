@@ -26,6 +26,8 @@
     <target name="notify" />
     <target name="currentbranch" />
     <target name="clean" />
+    <target name="cleanup" />
+    <target name="clean_history" />
     <target name="verbose" />
     <target name="prepare" />
     <target name="prepare.distributed" />

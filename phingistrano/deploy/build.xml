@@ -6,7 +6,6 @@
     <property name="deploy.cacheexists"  value="false" override="true" />
     <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
     <property name="deploy.strategy"     value="distributed" />
-    <property name="deploy.history"      value="5" />
     <property name="deploy.sshlib"       value="" />
     
     <!-- ============================================  -->
@@ -157,24 +156,8 @@
                       ${deploy.path}/releases/${deploy.ts}/log/${deploy.ts}.deploy.log;
                       rm ${deploy.path}/deploy.log; " />
                       
-        <!-- remove extra backissue if deploy.backissue is a value -->
-        <php expression="(strnatcasecmp('${deploy.history}','1') &gt;=0)?'true':'false'"
-             returnProperty="deploy.removehistory" />
-        <if>
-            <istrue value="${deploy.removehistory}"/>
-            <then>
-            <netssh username="${deploy.user}"
-                 password="${deploy.password}"
-                 host="${deploy.server}"
-                 sshlib="${deploy.sshlib}"
-                 command="(
-                 cd ${deploy.path}/releases &amp;&amp;
-                 for dir in * ; do
-                    echo &#34;&#36;&#123;dir&#125;&#34;;
-                 done | sort -n | head -n -${deploy.history} | xargs -I '%' rm -rf '%'
-                 )" />
-            </then>
-        </if>
+        <!-- Clean history -->
+        <phingcall target="deploy.clean_history" />
 
     </target >
 
@@ -404,25 +387,10 @@
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
              command="echo ${deploy.revision} > ${deploy.path}/current/REVISION" />
-        
-        <!-- remove extra backissue if deploy.backissue is a value -->
-        <php expression="(strnatcasecmp('${deploy.history}','1') &gt;=0)?'true':'false'"
-             returnProperty="deploy.removehistory" />
-        <if>
-            <istrue value="${deploy.removehistory}"/>
-            <then>
-            <netssh username="${deploy.user}"
-                 password="${deploy.password}"
-                 host="${deploy.server}"
-                 sshlib="${deploy.sshlib}"
-                 command="(
-                 cd ${deploy.path}/releases &amp;&amp;
-                 for dir in * ; do
-                    echo &#34;&#36;&#123;dir&#125;&#34;;
-                 done | sort -n | head -n -${deploy.history} | xargs -I '%' rm -rf '%'
-                 )" />
-            </then>
-        </if>
+             
+        <!-- Clean history -->
+        <phingcall target="deploy.clean_history" />
+
     </target>
 
     <!-- ============================================  -->
@@ -476,9 +444,7 @@
     <!-- Target: clean                                 -->
     <!-- ============================================  -->
     <target name="clean" >
-
         <delete dir="${project.basedir}/${build.target}/cached-copy" />
-
     </target>
 
     <!-- ============================================  -->
@@ -518,6 +484,36 @@
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
              command="echo ${deploy.password} | ${command}" />
+    </target>
+    
+    <!-- ============================================  -->
+    <!-- Target: cleanup                                -->
+    <!-- ============================================  -->
+    <target name="cleanup" >
+        <foreach list="${deploy.servers}" param="deploy.server" target="deploy.clean_history" />
+    </target>
+    
+    <!-- ============================================  -->
+    <!-- Target: clean_history                                -->
+    <!-- ============================================  -->
+    <target name="clean_history" >
+        <!-- remove deployment history if deploy.history is a value -->
+        <if>
+            <isset value="${deploy.history}" />
+            <then>
+                <php expression="${deploy.history} + 1" returnProperty="sum"/>
+                <netssh username="${deploy.user}"
+                    password="${deploy.password}"
+                    host="${deploy.server}"
+                    sshlib="${deploy.sshlib}"
+                    command="(
+                    cd ${deploy.path}/releases &amp;&amp;
+                    for dir in * ; do
+                        echo &#34;&#36;&#123;dir&#125;&#34;;
+                    done | sort -n | head -n -${sum} | xargs -I '%' rm -rf '%'
+                    )" />
+            </then>
+        </if>
     </target>
 
     <!-- ============================================  -->

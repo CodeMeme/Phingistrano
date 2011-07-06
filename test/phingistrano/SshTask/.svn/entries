@@ -1,0 +1,49 @@
+10
+
+dir
+0
+http://svn.phing.info/branches/2.5/test/classes/phing/tasks/ext/SshTask
+http://svn.phing.info
+add
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+34c17c5f-800b-0410-92ba-a69295604261
+
+SshTaskTest.xml
+file
+
+
+
+add
+
+SshTestHelper.php
+file
+
+
+
+add
+
+SshTaskTest.php
+file
+
+
+
+add
+

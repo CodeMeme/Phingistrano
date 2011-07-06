@@ -196,7 +196,7 @@
     <api>stable</api>
    </stability>
    <date>2011-07-05</date>
-   <license uri="http://www.opensource.org/licenses/mit-license.php">MIT</license>
+   <license uri="http://www.opensource.org/licenses/GPL-3.0">GNU GPL 3.0</license>
    <notes>
 -
    </notes>

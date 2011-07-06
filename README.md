@@ -579,7 +579,7 @@ Runs a target called "precache" right before you enter in to the repository cach
     
 ##### deploy.history #####
 
-By default, Phingistrano only keeps 5 of your most recent deployments including the current. If you would like to change the number of back deployments, you can do that with the deploy.history property. If you want to keep every deployment, simply set the value to zero. 
+By default, Phingistrano will keep every deployment if your project. If you do not want to limit the amount of back deployments simply do not set this value. If you would like to limit the number of back deployments, that Phingistrano will retain, you can do that with the deploy.history property. If you do not want to keep any back deployments, simply set the value to zero (not recommended). 
 
     <property name="deploy.history"    value="5" />
 
