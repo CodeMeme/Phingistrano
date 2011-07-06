@@ -8,6 +8,8 @@
     <property name="test.excpattern"   value="" />
     <property name="test.type"         value="xml" />
     <property name="test.usefile"      value="true" />
+    <property name="test.todir"        value="${project.basedir}/${build.target}/reports" />
+    <property name="test.format"       value="xml" />
     <property name="test.haltfail"     value="true" />
     <property name="test.halterror"    value="true" />
 
@@ -21,7 +23,7 @@
                    value="true" />
         <if>
             <not>
-		        <equals arg1="${test.reportsexist}" arg2="1" />
+                <istrue value="${test.reportsexist}"/>
 	        </not>
             <then>
                 <!-- create required directories -->
