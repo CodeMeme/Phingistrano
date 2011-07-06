@@ -152,8 +152,6 @@
              sshlib="${deploy.sshlib}"
              command="cp ${deploy.path}/deploy.log
                       ${deploy.path}/${build.target}/logs/deploy/${deploy.ts}.deploy.log;
-                      cp ${deploy.path}/deploy.log
-                      ${deploy.path}/releases/${deploy.ts}/log/${deploy.ts}.deploy.log;
                       rm ${deploy.path}/deploy.log; " />
                       
         <!-- Clean history -->
