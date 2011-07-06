@@ -499,7 +499,7 @@
     <target name="clean_history" >
         <!-- remove deployment history if deploy.history is a value -->
         <if>
-            <isset value="${deploy.history}" />
+            <isset property="deploy.history" />
             <then>
                 <php expression="${deploy.history} + 1" returnProperty="sum"/>
                 <netssh username="${deploy.user}"
