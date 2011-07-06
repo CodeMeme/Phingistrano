@@ -90,10 +90,9 @@
                  
             <formatter todir="${project.basedir}/${build.target}/reports"
                        type="${test.type}"
-                       usefile="true" 
                        outfile="${test.outfile}" />
                        
-            <formatter type="plain" usefile="false" />
+            <formatter type="plain" usefile="0" />
             
             <batchtest>
                 <fileset dir="${test.dir}">
