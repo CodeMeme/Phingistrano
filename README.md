@@ -33,9 +33,9 @@ Ive added the ability to use a "Pure PHP" implementation of ssh2 thanks to the P
 ## Common build and deploy repository ##
 This is an attempt to keep all of our build utilities in a common centralized repository that can be loaded as a submodule. The hope is that we can add this submodule to any existing project and immediately use its build/deploy functionality, pending some property/configuration changes.  
 
-Phingistrano tries to be flexible by loading it's individual components as modules by the Phing *importTask* task. This repository does not contain the main build.xml to use, but it does give an [example of what one might look like](https://github.com/CodeMeme/Phingistrano/blob/master/build.example.xml) .  
+Phingistrano tries to be flexible by loading it's individual components as modules by the Phing *importTask* task. This repository does not contain the main build.xml to use, but it does give an [example of what one might look like](https://github.com/CodeMeme/Phingistrano/blob/master/phingistrano/build.example.xml) .  
 
-It's important to understand that by this paradigm, you must tailor your buid.xml to the project, and import these submodules as needed. If you need customized versions of individual components, you could simply override or use different tasks defined in your build.xml, or even better, [import a custom build.helpers.xml](https://github.com/CodeMeme/Phingistrano/blob/master/build.helpers.example.xml) . In the examples I've shown, the targets are just aggregated targets from within the modules, strung together with the *depends* attribute. If you look at how it's done, you will likely see how easy, clean and flexible this is.  
+It's important to understand that by this paradigm, you must tailor your buid.xml to the project, and import these submodules as needed. If you need customized versions of individual components, you could simply override or use different tasks defined in your build.xml, or even better, [import a custom build.helpers.xml](https://github.com/CodeMeme/Phingistrano/blob/master/phingistrano/build.helpers.example.xml) . In the examples I've shown, the targets are just aggregated targets from within the modules, strung together with the *depends* attribute. If you look at how it's done, you will likely see how easy, clean and flexible this is.  
 
 <a name="commandline" />  
 
