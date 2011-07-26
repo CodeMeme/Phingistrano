@@ -98,6 +98,8 @@
                 <fileset dir="${test.dir}">
                     <include name="${test.incpattern}"/>
                     <exclude name="${test.excpattern}"/>
+                    <exclude name="${build.target}/**/*"/>
+                    <exclude name="Phingistrano/**/*"/>
                 </fileset>
             </batchtest>
             
