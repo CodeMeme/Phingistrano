@@ -35,6 +35,7 @@ class NetScpTask extends Task
     protected $filesets = array(); // all fileset objects assigned to this task
     protected $todir = "";
     protected $mode = null;
+    protected $ds = "/";
 
     protected $host = "";
     protected $port = 22;
@@ -104,6 +105,22 @@ class NetScpTask extends Task
     public function getMode()
     {
         return $this->mode;
+    }
+    
+    /**
+     * Sets the Directory Separator
+     */
+    public function setDs($ds)
+    {
+        $this->ds = $ds;
+    }
+
+    /**
+     * Returns the Directory Separator
+     */
+    public function getDs()
+    {
+        return $this->ds;
     }
 
     /**
@@ -383,7 +400,7 @@ class NetScpTask extends Task
         }
         
         if ($this->file != "") {
-            $this->ssh2CopyFile($this->file, basename($this->file));
+            $this->ssh2CopyFile($this->file, $this->ds . basename($this->file));
         } else {
             if ($this->fetch) {
                 throw new BuildException("Unable to use filesets to retrieve files from remote server");
@@ -408,7 +425,7 @@ class NetScpTask extends Task
     
     protected function ssh2CopyFile($local, $remote)
     {
-        $path = rtrim($this->todir, "/") . "/";
+        $path = $this->normalizePath($this->todir);
         
         if ($this->fetch) {
             $localEndpoint = $path . $remote;
@@ -482,7 +499,7 @@ class NetScpTask extends Task
         }
         
         if ($this->file != "") {
-            $this->netsshCopyFile($this->file, basename($this->file));
+            $this->netsshCopyFile($this->file, $this->ds . basename($this->file));
         } else {
             if ($this->fetch) {
                 throw new BuildException("Unable to use filesets to retrieve files from remote server");
@@ -507,7 +524,7 @@ class NetScpTask extends Task
     
     protected function netsshCopyFile($local, $remote)
     {
-        $path = rtrim($this->todir, "/") . "/";
+        $path = $this->normalizePath($this->todir);
         
         if ($this->fetch) {
             $localEndpoint = $path . $remote;
@@ -561,5 +578,17 @@ class NetScpTask extends Task
 
         return false;
     }
+    
+    /**
+     * Changes the path depending on the directory separator
+     * @param string $path
+     * @return string
+     */
+    private function normalizePath($path) 
+    {
+        $output = str_replace('/', $this->ds, $path);
+        return str_replace('\\', $this->ds, $output);
+    }
+     
 }
 ?>

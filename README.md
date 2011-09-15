@@ -1,10 +1,8 @@
 # Phingistrano ![project status](http://stillmaintained.com/CodeMeme/Phingistrano.png) #
 A PHP utility for building and deploying projects based on Phing and other paralell technology.
 
-## NEW! Symfony2 Helpers ##
-Ive added an example of a helpers file that you could use to help manage a symfony2 deployment.  
-[Check it out](https://github.com/CodeMeme/Phingistrano/blob/develop/symfony2.helpers.xml)  
-[README][symfony2]
+## NEW! WINNT deployment is now possible ##
+Ive added a new deployment property called deploy.arch. By default it will have the value of UNIX, but if you change the value to WINNT then it will change the value of the directory separators in commands where windows architecture is relevant. Due to the difficulty in symlinking windows folders with MKLINK, the deployment procedure is slightly different in that the current deployment is a physical copy instead of a symlink. This was due to some problems with OpenSSH and Cygwin which was making symlinking too difficult.
 
 ## NEW! phpseclib library ##
 Ive added the ability to use a "Pure PHP" implementation of ssh2 thanks to the PEAR seclib library. For those who have had trouble with using Phingistrano because of the SSH2 dependency, you may want to have a look.    
@@ -582,6 +580,15 @@ Runs a target called "precache" right before you enter in to the repository cach
 By default, Phingistrano will keep every deployment if your project. If you do not want to limit the amount of back deployments simply do not set this value. If you would like to limit the number of back deployments, that Phingistrano will retain, you can do that with the deploy.history property. If you do not want to keep any back deployments, simply set the value to zero (not recommended). 
 
     <property name="deploy.history"    value="5" />
+    
+##### deploy.arch #####
+
+deploy architecture of the deployment system. By default the value is "UNIX" but can be set to "WINNT" for deploying to windows architectures. This is only supported for Windows servers running OpenSSH with Cygwin. 
+
+**ALERT**
+Setting the deploy.arch property to WINNT will change the deployment procedure in that the current deployment will be a physical copy instead of a symlink. there will still be a backlog of releases in the releases folder, the only thing that changes is that the symlink will be a physical copy of the specified release folder.  
+    
+    <property name="deploy.arch"       value="UNIX" />
 
 ##### deploy.branch #####
 

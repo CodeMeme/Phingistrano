@@ -3,10 +3,22 @@
 
     <!-- deploy properties -->
     <property name="deploy.branch"       value="master" />
+    <property name="deploy.ds"           value="/" />
+    <property name="deploy.arch"         value="UNIX" />
+    
+    <if>
+        <equals arg1="WINNT" arg2="${deploy.arch}" />
+        <then>
+            <property name="deploy.ds"   value="\" override="true" />
+        </then>
+    </if>
+
     <property name="deploy.cacheexists"  value="false" override="true" />
-    <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}/deploy.log" />
+    <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}${deploy.ds}deploy.log" />
     <property name="deploy.strategy"     value="distributed" />
     <property name="deploy.sshlib"       value="" />
+    
+    
     
     <!-- ============================================  -->
     <!-- Custom Taskdefs                               -->
@@ -141,18 +153,18 @@
               password="${deploy.password}"
               host="${deploy.server}"
               sshlib="${deploy.sshlib}"
-              command="rm ${deploy.path}/current ${deploy.log};
-                       ln -s ${deploy.path}/releases/${deploy.ts}
-                       ${deploy.path}/current ${deploy.log}; " />
+              command="rm ${deploy.path}${deploy.ds}current ${deploy.log};
+                       ln -s ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts}
+                       ${deploy.path}${deploy.ds}current ${deploy.log}; " />
 
          <!-- deposit the deploy log in the log folder -->
          <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="cp ${deploy.path}/deploy.log
-                      ${deploy.path}/${build.target}/logs/deploy/${deploy.ts}.deploy.log;
-                      rm ${deploy.path}/deploy.log; " />
+             command="cp ${deploy.path}${deploy.ds}deploy.log
+                      ${deploy.path}${deploy.ds}${build.target}${deploy.ds}logs${deploy.ds}deploy${deploy.ds}${deploy.ts}.deploy.log;
+                      rm ${deploy.path}${deploy.ds}deploy.log; " />
                       
         <!-- Clean history -->
         <phingcall target="deploy.clean_history" />
@@ -166,7 +178,7 @@
 
         <available file="${project.basedir}/${build.target}/cached-copy"
                    property="deploy.cacheexists"
-                   value="true"/>
+                   value="true" />
 
         <if>
             <isfalse value="${deploy.cacheexists}"/>
@@ -205,10 +217,10 @@
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="if [ ! -d ${deploy.path}/${build.target}/cached-copy ]; then
+             command="if [ ! -d ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy ]; then
                         git clone -q --depth 1 ${deploy.repository}
-                        ${deploy.path}/${build.target}/cached-copy ${deploy.log};
-                        (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                        ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy ${deploy.log};
+                        (cd ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy &amp;&amp;
                         git submodule init) ${deploy.log};
                       fi; " />
 
@@ -216,19 +228,19 @@
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="mkdir -p ${deploy.path}/${build.target}/tarballs ${deploy.log};" />
+             command="mkdir -p ${deploy.path}${deploy.ds}${build.target}${deploy.ds}tarballs ${deploy.log};" />
 
         <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="mkdir -p ${deploy.path}/${build.target}/logs/deploy ${deploy.log};" />
+             command="mkdir -p ${deploy.path}${deploy.ds}${build.target}${deploy.ds}logs${deploy.ds}deploy ${deploy.log};" />
 
         <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="mkdir -p ${deploy.path}/releases  ${deploy.log};" />
+             command="mkdir -p ${deploy.path}${deploy.ds}releases  ${deploy.log};" />
              
         <!-- Pre-Cache Hook -->
         <phingcall target="precache" />
@@ -259,13 +271,13 @@
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+             command="(cd ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy &amp;&amp;
                       git fetch origin) ${deploy.log};
                       echo Found current branch is ${deploy.branch} ${deploy.log};
-                      (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
-                      REV=$(git rev-parse origin/${deploy.branch}) &amp;&amp;
+                      (cd ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy &amp;&amp;
+                      REV=$(git rev-parse origin${deploy.ds}${deploy.branch}) &amp;&amp;
                       echo Found revision is $REV &amp;&amp;
-                      cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+                      cd ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy &amp;&amp;
                       git checkout -f $REV) ${deploy.log}; " />
 
         <!-- reset submodules to their appropriate revisions -->
@@ -273,10 +285,10 @@
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="for mod in `(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+             command="for mod in `(cd ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy &amp;&amp;
                       git submodule status | awk '{ print $2 }')`; do
-                        (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
-                        git config -f .git/config submodule.&#36;{mod}.url
+                        (cd ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy &amp;&amp;
+                        git config -f .git${deploy.ds}config submodule.&#36;{mod}.url
                         `git config -f .gitmodules --get submodule.&#36;{mod}.url`)
                         ${deploy.log};
                       done;" />
@@ -286,7 +298,7 @@
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="(cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
+             command="(cd ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy &amp;&amp;
                        git submodule update) ${deploy.log}; " />
                        
         <!-- Post-Cache Hook -->
@@ -297,18 +309,18 @@
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="mkdir ${deploy.path}/releases/${deploy.ts} ${deploy.log};
-                      cp -R ${deploy.path}/${build.target}/cached-copy/*
-                      ${deploy.path}/releases/${deploy.ts} ${deploy.log};
-                      for i in `find ${deploy.path}/releases/${deploy.ts} -name .git` ; do
+             command="mkdir ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts} ${deploy.log};
+                      cp -R ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy/*
+                      ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts} ${deploy.log};
+                      for i in `find ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts} -name .git` ; do
                         rm -rf $i ${deploy.log};
                       done;
-                      rm -rf ${deploy.path}/releases/${deploy.ts}/${build.target} ${deploy.log};
-                      (cd ${deploy.path}/${build.target}/cached-copy &amp;&amp;
-                      REV=$(git rev-parse origin/${deploy.branch}) &amp;&amp;
-                      echo $REV > ${deploy.path}/releases/${deploy.ts}/REVISION);
-                      tar czf ${deploy.path}/${build.target}/tarballs/${deploy.tarball}
-                      ${deploy.path}/releases/${deploy.ts} ${deploy.log};"/>
+                      rm -rf ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts}${deploy.ds}${build.target} ${deploy.log};
+                      (cd ${deploy.path}${deploy.ds}${build.target}${deploy.ds}cached-copy &amp;&amp;
+                      REV=$(git rev-parse origin${deploy.ds}${deploy.branch}) &amp;&amp;
+                      echo $REV > ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts}${deploy.ds}REVISION);
+                      tar czf ${deploy.path}${deploy.ds}${build.target}${deploy.ds}tarballs${deploy.ds}${deploy.tarball}
+                      ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts} ${deploy.log};"/>
 
         <!-- print filesize info -->
         <netssh username="${deploy.user}"
@@ -317,7 +329,7 @@
               sshlib="${deploy.sshlib}"
               command="echo File size ${deploy.log};
                        echo ============== ${deploy.log};
-                       B=$(stat -c %s ${deploy.path}/${build.target}/tarballs/${deploy.tarball});
+                       B=$(stat -c %s ${deploy.path}${deploy.ds}${build.target}${deploy.ds}tarballs${deploy.ds}${deploy.tarball});
                        KB=$(($B / 1024));
                        echo $KB Kb ${deploy.log};
                        MB=$(($KB / 1024));
@@ -331,51 +343,64 @@
     <target name="deliver" depends="deploy.upload" >
 
         <!-- create target directory -->
-        <echo msg="creating directory: ${deploy.path}/releases/${deploy.ts}" />
+        <echo msg="creating directory: ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts}" />
 
         <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="mkdir -p ${deploy.path}/releases/${deploy.ts}" />
+             command="mkdir -p ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts}" />
 
         <!-- unpack tarball -->
-        <echo msg="unpacking: ${project.basedir}/tarballs/${deploy.tarball}
+        <echo msg="unpacking: ${deploy.path}${deploy.ds}tarballs${deploy.ds}${deploy.tarball}
                    to remote location: ${deploy.server}:
-                   ${deploy.path}/releases/${deploy.ts}" />
+                   ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts}" />
 
         <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="tar -xvf ${deploy.path}/${deploy.tarball} --directory=${deploy.path}/releases/${deploy.ts}" />
+             command="tar -xvf ${deploy.path}${deploy.ds}${deploy.tarball} --directory=${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts}" />
 
         <!-- delete tarball -->
-        <echo msg="deleting tarball: ${deploy.path}/${deploy.tarball}" />
+        <echo msg="deleting tarball: ${deploy.path}${deploy.ds}${deploy.tarball}" />
 
         <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="rm ${deploy.path}/${deploy.tarball}" />
+             command="rm ${deploy.path}${deploy.ds}${deploy.tarball}" />
 
         <!-- link it -->
-        <echo msg="deleting symlink: ${deploy.path}/current" />
+        <echo msg="deleting current deployment: ${deploy.path}${deploy.ds}current" />
 
         <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="rm ${deploy.path}/current" />
+             command="rm -rf ${deploy.path}${deploy.ds}current" />
 
-        <echo msg="creating new symlink: ${deploy.path}/current" />
+        <echo msg="creating new deployment: ${deploy.path}${deploy.ds}current" />
+
+        <if>
+            <not>
+                <equals arg1="UNIX" arg2="${deploy.arch}" />
+            </not>
+            <then>
+                <property name="linkcmd" value="cp -R ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts} ${deploy.path}${deploy.ds}current" />
+            </then>
+            <else>
+                <property name="linkcmd" value="
+                    ln -s ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts}
+                    ${deploy.path}${deploy.ds}current" />
+            </else>
+        </if>
 
         <netssh username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="ln -s ${deploy.path}/releases/${deploy.ts}
-                      ${deploy.path}/current" />
+             command="${linkcmd}" />
 
         <!-- revision tag -->
         <echo msg="placing hash in REVISION: ${deploy.revision}" />
@@ -384,12 +409,13 @@
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             command="echo ${deploy.revision} > ${deploy.path}/current/REVISION" />
+             command="echo ${deploy.revision} > ${deploy.path}${deploy.ds}current${deploy.ds}REVISION" />
              
         <!-- Clean history -->
         <phingcall target="deploy.clean_history" />
 
     </target>
+    
 
     <!-- ============================================  -->
     <!-- Target: upload                                -->
@@ -405,6 +431,7 @@
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
              todir="${deploy.path}"
+             ds="${deploy.ds}"
              file="${project.basedir}/${build.target}/tarballs/${deploy.tarball}" />
 
     </target>
@@ -505,7 +532,7 @@
                     host="${deploy.server}"
                     sshlib="${deploy.sshlib}"
                     command="(
-                    cd ${deploy.path}/releases &amp;&amp;
+                    cd ${deploy.path}${deploy.ds}releases &amp;&amp;
                     for dir in * ; do
                         echo &#34;&#36;&#123;dir&#125;&#34;;
                     done | sort -n | head -n -${sum} | xargs -I '%' rm -rf '%'
