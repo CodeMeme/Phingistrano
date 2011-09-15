@@ -387,7 +387,7 @@
                 <equals arg1="UNIX" arg2="${deploy.arch}" />
             </not>
             <then>
-                <property name="linkcmd" value="cp -R ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts} ${deploy.path}${deploy.ds}current" />
+                <property name="linkcmd" value="cp -R ${deploy.path}${deploy.ds}releases${deploy.ds}${deploy.ts}/* ${deploy.path}${deploy.ds}current" />
             </then>
             <else>
                 <property name="linkcmd" value="
