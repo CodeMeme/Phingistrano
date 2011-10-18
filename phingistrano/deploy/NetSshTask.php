@@ -327,7 +327,7 @@ class NetSshTask extends Task {
             throw new BuildException("Could not authenticate connection!");
         }
 
-        $output = $this->connection->exec($this->normalizeCmd($this->command));
+        $output = $this->connection->exec($this->command);
         if (!$output) {
             $output = "";
         }
@@ -364,15 +364,6 @@ class NetSshTask extends Task {
         }
 
         return false;
-    }
-    
-    /**
-     * prevent the stripping of backspaces for windows paths
-     * @param string $cmd
-     */
-    private function normalizeCmd($cmd) 
-    {
-        return str_replace('\\', '/', $cmd);
     }
      
 

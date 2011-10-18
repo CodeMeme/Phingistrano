@@ -5,13 +5,6 @@
     <property name="deploy.branch"       value="master" />
     <property name="deploy.ds"           value="/" />
     <property name="deploy.arch"         value="UNIX" />
-    
-    <if>
-        <equals arg1="WINNT" arg2="${deploy.arch}" />
-        <then>
-            <property name="deploy.ds"   value="\" override="true" />
-        </then>
-    </if>
 
     <property name="deploy.cacheexists"  value="false" override="true" />
     <property name="deploy.log"          value="2&gt;&amp;1 | tee ${deploy.path}${deploy.ds}deploy.log" />
@@ -426,12 +419,13 @@
 
         <echo msg="to server: ${deploy.server}" />
 
+        <echo msg="to target: ${deploy.path}${deploy.ds}" />
+
         <netscp username="${deploy.user}"
              password="${deploy.password}"
              host="${deploy.server}"
              sshlib="${deploy.sshlib}"
-             todir="${deploy.path}"
-             ds="${deploy.ds}"
+             todir="${deploy.path}${deploy.ds}"
              file="${project.basedir}/${build.target}/tarballs/${deploy.tarball}" />
 
     </target>
