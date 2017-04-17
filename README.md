@@ -951,7 +951,7 @@ This clears the cache, warms up the cache, and performs a cruicial directory per
 <a name="gotchas" />
  
 [gotchas]: #gotchas
-##Gotchas ##
+## Gotchas  ##
   
 ### namespaced submodules won't work if a base target doesn't exist ###
 
